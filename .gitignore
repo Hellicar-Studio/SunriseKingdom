@@ -7,6 +7,11 @@
 [Ll]ibrary/
 sysinfo.txt
 *.stackdump
+
+# ======================= #
+# Streaming Assets Folder #
+# ======================= #
+Streaming Assets/
  
 # ===================================== #
 # Visual Studio / MonoDevelop generated #
