@@ -1,0 +1,14 @@
+Internal IP address:
+192.168.1.180
+
+External IP address:
+88.97.57.25
+
+RTSP H.264 Video Feed which works in VLC - access this by openning IE or Safari or directly in VLC (doesn't work with external IP address): 
+rtsp://root:pass@192.168.1.180/axis-media/media.amp?videocodec=h264
+rtsp://root:pass@88.97.57.25/axis-media/media.amp?videocodec=h264 ???
+
+
+HTTP MJPEG Video Feed which works with a web browser & VLC (works with external IP address):
+http://192.168.1.180/axis-cgi/mjpg/video.cgi
+http://88.97.57.25/axis-cgi/mjpg/video.cgi
