@@ -20,16 +20,22 @@ public class StreamingVideo : MonoBehaviour {
         // reference components
         rend = GetComponent<Renderer>();
         // grab video stream and send to texture
-        StartCoroutine(PlayVideo());
+        //StartCoroutine(PlayVideo());
     }
 
     void Update() 
     {
-        if (tex.isPlaying)
-        {
-            if (saveAsScreenshot) Screenshot();
-            if (saveAsBytes) SaveToPNG();
-        }
+        //if (tex.isPlaying)
+        //{
+        //    if (saveAsScreenshot) Screenshot();
+        //    if (saveAsBytes) SaveToPNG();
+        //}
+        //else
+        //{
+        //    if (frame != 0) frame = 0;
+        //}
+
+        if (saveAsScreenshot) Screenshot();
         else
         {
             if (frame != 0) frame = 0;
@@ -48,7 +54,7 @@ public class StreamingVideo : MonoBehaviour {
         // plays MovieTexture
         tex.Play();
         // sharpen the pixels
-        tex.filterMode = FilterMode.Point;
+        //tex.filterMode = FilterMode.Point;
 
         // update renderer texture with MovieTexture
         rend.material.mainTexture = tex;
