@@ -46,21 +46,23 @@ public class ImageController : MonoBehaviour {
 
     private void CheckForFiles(string _folderName)
     {
-        DirectoryInfo di = new DirectoryInfo(_folderName);
-        int fileCount = di.GetFiles().Length - 1;
+        if (debugActive) Debug.Log("Checking for files...");
 
-        if (fileCount == 0)
+        DirectoryInfo di = new DirectoryInfo(_folderName);
+        int fileCount = di.GetFiles().Length;
+
+        if (fileCount < 2)
         {
             filesExist = false;
             extCount++;
-            if(extCount > 2)
+
+            if(extCount > 1)
             {
                 timeExtension = 60f;
             }
             else
             {
                 timeExtension = 0f;
-                extCount = 0;
             }
         }
         else
@@ -78,11 +80,15 @@ public class ImageController : MonoBehaviour {
             // get file paths
             files = Directory.GetFiles(_folderName, "*.png");
 
+            if (debugActive)
+                Debug.Log("Files loaded " + files.Length);
+            
             texTmp = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, false);
             texTmp.filterMode = FilterMode.Point;
 
             // reset index
             index = 0f;
+            extCount = 0;
 
             isLoaded = true;
         }
@@ -92,7 +98,8 @@ public class ImageController : MonoBehaviour {
             elapsedTime += Time.deltaTime;
             if (elapsedTime >= timeExtension)
             {
-                files = null;
+                //files = null;
+//                if (debugActive) Debug.Log("Checking for files...");
                 CheckForFiles(_folderName);
                 elapsedTime = 0f;
             }
@@ -103,8 +110,8 @@ public class ImageController : MonoBehaviour {
     public void PlayImages(float _fps)
     {
         // frame index at the rate of frames per second
-        index = Time.time * _fps;
-        index = index % files.Length;
+//        index = Time.time * _fps;
+//        index = index % files.Length;
 
         // load latest 
         string pathTemp = "file://" + Application.dataPath + "/../" + files[(int)index];
@@ -114,8 +121,13 @@ public class ImageController : MonoBehaviour {
         // update renderer with latest frame
         rend.material.mainTexture = texTmp;
 
+        index++;
         // resets index to loop through
         if (index >= files.Length)
             index = 0;
+
+        // reset toggle
+        if (filesExist)
+            filesExist = false;
     }
 }

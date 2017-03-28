@@ -7,6 +7,8 @@ public class VideoController : MonoBehaviour {
 
     [HideInInspector] 
     public bool isFolderClear = false;
+    [HideInInspector]
+    public float recordingMaxSeconds;
 
     private Renderer rend;
     private int index = 0;
@@ -94,9 +96,13 @@ public class VideoController : MonoBehaviour {
     // much faster super awesome yes yes!
     public void VideoRecord(string _folderName, float _fps)
     {
-        Time.captureFramerate = (int)_fps;
+        //Time.captureFramerate = (int)_fps;
+
+        // frame index at the rate of frames per second
+//        index = (int)(Time.time * _fps);
+//        index = index % (int)(_fps * recordingMaxSeconds);
             
-        Application.CaptureScreenshot(_folderName + "/image_" + FileNamePadding(index) + ".png");
+        Application.CaptureScreenshot(_folderName + "/image_" + FileNamePadding(index) + ".png", 1);
         index++;
     }
 }

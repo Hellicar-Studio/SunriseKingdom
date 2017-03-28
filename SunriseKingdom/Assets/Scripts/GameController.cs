@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class GameController : MonoBehaviour {
 	
+    public SunriseController sunrise;
     public VideoController video;
     public ImageController image;
-    public SunriseController sunrise;
     public MediaPlayerCtrl scrMedia;
 
     public string videoURL = "rtsp://88.97.57.25:10001/axis-media/media.amp?videocodec=h264";
@@ -26,6 +26,13 @@ public class GameController : MonoBehaviour {
     // Use this for initialization
     void Start () 
     {
+        Time.captureFramerate = (int)framesPerSecond;
+
+        // sunrise startup
+        sunrise.APIKey = APIKey;
+        sunrise.city = city;
+        sunrise.GetSunriseTime();
+
         // setup debug info
         sunrise.debugActive = debugActive;
         image.debugActive = debugActive;
@@ -33,10 +40,8 @@ public class GameController : MonoBehaviour {
         // setup video stream url
         scrMedia.m_strFileName = videoURL;
 
-        // sunrise startup
-        sunrise.APIKey = APIKey;
-        sunrise.city = city;
-        sunrise.GetSunriseTime();
+        // sync seconds
+        video.recordingMaxSeconds = recordingMaxSeconds;
     }
 
 	// Update is called once per frame

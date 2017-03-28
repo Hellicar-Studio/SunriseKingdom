@@ -18,7 +18,7 @@ public class SunriseController : MonoBehaviour {
     [HideInInspector]
     public bool debugActive = false;
 
-    private float elapsedTime = 0f;
+//    private float elapsedTime = 0f;
     private int utcTime;
     private string URL1 = "http://api.openweathermap.org/data/2.5/weather?q=";
     private string URL2 = "&appid=";
