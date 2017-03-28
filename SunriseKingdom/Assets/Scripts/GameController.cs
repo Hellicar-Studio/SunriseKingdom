@@ -15,9 +15,13 @@ public class GameController : MonoBehaviour {
     public string checkSunriseTime = "03:00";
     public string dataFolder = "Images";
     public float framesPerSecond = 25f;
+    public float recordingMaxSeconds = 3600f;
     public bool debugActive = true;
+    public bool simulationMode = false;
+    public bool manualRecord = false;
 
     private bool isSunriseActive = false;
+    private float elapsedTime = 0f;
 
     // Use this for initialization
     void Start () 
@@ -47,6 +51,28 @@ public class GameController : MonoBehaviour {
         {
             scrMedia.UnLoad();
         }
+
+        if (manualRecord || isSunriseActive)
+        {
+            // count up seconds
+            elapsedTime += Time.deltaTime;
+
+            // if elapsed time is greater than 1hr
+            if (elapsedTime >= recordingMaxSeconds)
+            {
+                if (debugActive)
+                {
+                    Debug.Log("Recording complete!");
+                    Debug.Log("Elapsed time in seconds " + elapsedTime);
+                    Debug.Log("Manual Recording Active " + manualRecord);
+                }
+
+                // disable
+                elapsedTime = 0f;
+                manualRecord = false;
+                sunrise.isActive = false;
+            }
+        }
 	}
 
     private void SunSystem()
@@ -62,53 +88,113 @@ public class GameController : MonoBehaviour {
                 sunrise.isUpdateTime = false;
         }
 
-        isSunriseActive = sunrise.GetSunriseStatus();
+        sunrise.GetSunriseStatus();
+
+        if (!simulationMode)
+        {
+            isSunriseActive = sunrise.isActive;
+        }
+        else
+        {
+            isSunriseActive = manualRecord;
+        }
     }
 
     private void VideoSystem()
     {
-        if (isSunriseActive)
+        if (!simulationMode)
         {
-            if (!video.isFolderClear)
+            if (isSunriseActive)
             {
-                video.ClearFolder(dataFolder);
+                if (!video.isFolderClear)
+                {
+                    video.ClearFolder(dataFolder);
+                }
+                else
+                {
+                    video.VideoRecord(dataFolder, framesPerSecond);
+                    video.RenderMaterial(true);
+                }
             }
             else
             {
-                video.VideoRecord(dataFolder, framesPerSecond);
-                video.RenderMaterial(true);
+                if (video.isFolderClear)
+                    video.isFolderClear = false;
+
+                video.RenderMaterial(false);
             }
         }
         else
         {
-            if (video.isFolderClear) 
-                video.isFolderClear = false;
+            if (manualRecord)
+            {
+                if (!video.isFolderClear)
+                {
+                    video.ClearFolder(dataFolder);
+                }
+                else
+                {
+                    video.VideoRecord(dataFolder, framesPerSecond);
+                    video.RenderMaterial(true);
+                }
+            }
+            else
+            {
+                if (video.isFolderClear)
+                    video.isFolderClear = false;
 
-            video.RenderMaterial(false);
+                video.RenderMaterial(false);
+            }
         }
     }
 
     private void ImageSystem()
     {
-        if (isSunriseActive)
+        if (!simulationMode)
         {
-            if (image.isLoaded)
-                image.isLoaded = false;
-
-            image.RenderMaterial(false);
-        }
-        else
-        {
-            if (!image.isLoaded)
+            if (isSunriseActive)
             {
-                image.LoadImages(dataFolder);
+                if (image.isLoaded)
+                    image.isLoaded = false;
+
+                image.RenderMaterial(false);
             }
             else
             {
-                image.PlayImages(framesPerSecond);
-            }
+                if (!image.isLoaded)
+                {
+                    image.LoadImages(dataFolder);
+                }
+                else
+                {
+                    image.PlayImages(framesPerSecond);
+                }
 
-            image.RenderMaterial(true);
+                image.RenderMaterial(true);
+            }
+        }
+        else
+        {
+            if (manualRecord)
+            {
+                if (image.isLoaded)
+                    image.isLoaded = false;
+
+                image.RenderMaterial(false);
+            }
+            else
+            {
+                if (!image.isLoaded)
+                {
+                    image.LoadImages(dataFolder);
+                }
+                else
+                {
+                    image.PlayImages(framesPerSecond);
+                }
+
+                image.RenderMaterial(true);
+            }
         }
     }
 }
