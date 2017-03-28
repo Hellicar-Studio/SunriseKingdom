@@ -14,11 +14,12 @@ public class SunriseController : MonoBehaviour {
     [HideInInspector] 
     public bool isUpdateTime = false;
     [HideInInspector]
+    public bool isActive = false;
+    [HideInInspector]
     public bool debugActive = false;
 
     private float elapsedTime = 0f;
     private int utcTime;
-    private bool isActive = false;
     private string URL1 = "http://api.openweathermap.org/data/2.5/weather?q=";
     private string URL2 = "&appid=";
     private string unixTime;
@@ -29,37 +30,20 @@ public class SunriseController : MonoBehaviour {
         return DateTime.UtcNow.ToLocalTime().ToShortTimeString();
     }
 
-    public bool GetSunriseStatus()
+    public void GetSunriseStatus()
     {
-        // sunrise active timer
-        if (!isActive)
+        // if sunrise time, sets sunrise active trigger to true
+        if (GetLocalTime() == ConvertTime(utcTime))
         {
-            // if sunrise time, sets sunrise active trigger to true
-            if (GetLocalTime() == ConvertTime(utcTime))
+            // enable sunrise active timer
+            if (!isActive)
             {
-                if (!isActive)
-                {
-                    // reset elapsed time
-                    elapsedTime = 0f;
-                    // enable sunrise active timer
-                    isActive = true;
-                }
+                if (debugActive)
+                    Debug.Log("Sunrise isActive " + isActive);
+
+                isActive = true;
             }
         }
-        else
-        {
-            // count up seconds
-            elapsedTime += Time.deltaTime;
-
-            // if elapsed time is greater than 1hr
-            if (elapsedTime >= 3600)
-            {
-                // disable
-                isActive = false;
-            }
-        }
-
-        return isActive;
     }
 
     // gets sunrise time and converts UNIX/UTC to local time && short time (removes the date)
@@ -99,8 +83,22 @@ public class SunriseController : MonoBehaviour {
                 // parses text based on http://openweathermap.org/api for JSON
                 JObject j = JObject.Parse(data);
                 utcTime = (int)j.GetValue("sys").SelectToken("sunrise");
+                
                 // display results in the console
-                if (debugActive) Debug.Log("Sunrise time is " + ConvertTime(utcTime));
+                if (debugActive)
+                {
+                    string _country = j.GetValue("sys").SelectToken("country").ToString();
+                    string _cityid = j.SelectToken("id").ToString();
+                    string _city = j.SelectToken("name").ToString();
+                    string _lon = j.GetValue("coord").SelectToken("lon").ToString();
+                    string _lat = j.GetValue("coord").SelectToken("lat").ToString();
+
+                    Debug.Log("Sunrise city id is " + _cityid);
+                    Debug.Log("Sunrise city is " + _city);
+                    Debug.Log("Sunrise country is " + _country);
+                    Debug.Log("Sunrise lon is " + _lon + ", lat is " + _lat);
+                    Debug.Log("Sunrise time is " + ConvertTime(utcTime));
+                }
             }
         }
     }

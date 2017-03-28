@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
+using System;
 
 public class ImageController : MonoBehaviour {
 
@@ -15,6 +16,8 @@ public class ImageController : MonoBehaviour {
     private string[] files;
     private float index = 0f;
     private float elapsedTime = 0f;
+    private float timeExtension = 0f;
+    private int extCount = 0;
     private bool filesExist = false;
 
     // toggles object renderer
@@ -49,6 +52,16 @@ public class ImageController : MonoBehaviour {
         if (fileCount == 0)
         {
             filesExist = false;
+            extCount++;
+            if(extCount > 2)
+            {
+                timeExtension = 60f;
+            }
+            else
+            {
+                timeExtension = 0f;
+                extCount = 0;
+            }
         }
         else
         {
@@ -77,13 +90,13 @@ public class ImageController : MonoBehaviour {
         {
             // check every 60 seconds
             elapsedTime += Time.deltaTime;
-            if (elapsedTime >= 60)
+            if (elapsedTime >= timeExtension)
             {
+                files = null;
                 CheckForFiles(_folderName);
                 elapsedTime = 0f;
             }
         }
-
     }
 
     // loads images on the fly
