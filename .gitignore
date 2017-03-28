@@ -12,6 +12,8 @@ sysinfo.txt
 # Streaming Assets Folder #
 # ======================= #
 StreamingAssets/
+Plugins/
+AVProVideo/
  
 # ===================================== #
 # Visual Studio / MonoDevelop generated #
