@@ -13,6 +13,7 @@ public class CameraController : MonoBehaviour {
         public string date;
         public int startTimeInSeconds;
         public int stopTimeInSeconds;
+        public int duration;
     }
 
     public bool StartRecordingButton; // Press me to Start Recording
@@ -52,9 +53,9 @@ public class CameraController : MonoBehaviour {
 
         details.collected = false;
     }
-	
-	// Update is called once per frame
-	void Update () {
+
+    // Update is called once per frame
+    void Update () {
         if (StartRecordingButton && !currentlyRecording)
         {
             StartRecordingButton = false;
@@ -105,15 +106,13 @@ public class CameraController : MonoBehaviour {
             {
                 //Debug.Log(webResponse.text);
                 float newTime = Time.time;
-                Debug.Log("Time Download Ended: " + newTime);
                 Debug.Log("Num Bytes: " + webResponse.bytesDownloaded);
-                Debug.Log("System Start Write: " + Time.time);
-                System.IO.File.WriteAllBytes("C:\\Users\\Flowers\\Documents\\RandD\\SunriseKingdom\\Assets\\StreamingAssets\\Videos\\Test" + index.ToString() + ".mkv", webResponse.bytes);
-                Debug.Log("System Ended Write: " + Time.time);
+                System.IO.File.WriteAllBytes(Application.dataPath + "/StreamingAssets/Videos/Test" + index.ToString() + ".mkv", webResponse.bytes);
                 index++;
                 needToDownload = false;
-                if(index <= 60 / recordingInterval)
+                if(index <= details.duration / recordingInterval)
                 {
+                    Debug.Log("Starting Another Download!");
                     ExportButton = true;
                 }
             }
@@ -170,6 +169,8 @@ public class CameraController : MonoBehaviour {
         output.stopTime = newestStopTime;
         output.startTimeInSeconds = convertTimeToInt(newestStartTime);
         output.stopTimeInSeconds = convertTimeToInt(newestStopTime);
+        output.duration = output.stopTimeInSeconds - output.startTimeInSeconds;
+        Debug.Log("Duration: " + output.duration);
 
         details.collected = true;
         return output;
@@ -200,7 +201,7 @@ public class CameraController : MonoBehaviour {
         int start = convertTimeToInt(details.startTime);
         int end = convertTimeToInt(details.stopTime);
 
-        int newEnd = start + interval * 60;
+        int newEnd = start + interval;
 
         if (newEnd > end)
         {
