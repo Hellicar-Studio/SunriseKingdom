@@ -7,7 +7,7 @@ public class GameController : MonoBehaviour {
     public SunriseController sunrise;
     public VideoController video;
     public ImageController image;
-    public MediaPlayerCtrl scrMedia;
+    public MediaPlayerCtrl liveStream;
 
     public string videoURL = "rtsp://88.97.57.25:10001/axis-media/media.amp?videocodec=h264";
     public string APIKey = "7f09e7d718a5c1dd8d39f1635ac7f006";
@@ -38,7 +38,7 @@ public class GameController : MonoBehaviour {
         image.debugActive = debugActive;
 
         // setup video stream url
-        scrMedia.m_strFileName = videoURL;
+        liveStream.m_strFileName = videoURL;
 
         // sync seconds
         video.recordingMaxSeconds = recordingMaxSeconds;
@@ -48,13 +48,13 @@ public class GameController : MonoBehaviour {
 	void Update () 
     {
         SunSystem();
-        VideoSystem();
-        ImageSystem();
+        Capture();
+        Playback();
 
         // on escape key up, unload media and quit app
         if (Input.GetKeyUp(KeyCode.Escape))
         {
-            scrMedia.UnLoad();
+            liveStream.UnLoad();
         }
 
         if (manualRecord || isSunriseActive)
@@ -105,7 +105,7 @@ public class GameController : MonoBehaviour {
         }
     }
 
-    private void VideoSystem()
+    private void Capture()
     {
         if (!simulationMode)
         {
@@ -153,7 +153,7 @@ public class GameController : MonoBehaviour {
         }
     }
 
-    private void ImageSystem()
+    private void Playback()
     {
         if (!simulationMode)
         {
