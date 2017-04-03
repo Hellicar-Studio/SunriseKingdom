@@ -133,11 +133,11 @@ public class VideoPlayback : MonoBehaviour {
             elapsedTime = 0f;
         }
 
-        if (!media[0].m_Control.IsFinished() && (int)elapsedTime == loadAtSeconds && !isLoaded[1])
+        if (!media[0].Control.IsFinished() && (int)elapsedTime == loadAtSeconds && !isLoaded[1])
         {
             LoadVideo(1, item);
         }
-        else if (!media[1].m_Control.IsFinished() && (int)elapsedTime == loadAtSeconds && !isLoaded[0])
+        else if (!media[1].Control.IsFinished() && (int)elapsedTime == loadAtSeconds && !isLoaded[0])
         {
             LoadVideo(0, item);
         }
