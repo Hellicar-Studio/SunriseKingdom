@@ -4,7 +4,7 @@ using UnityEngine;
 using System.IO;
 using System;
 
-public class ImageController : MonoBehaviour {
+public class ImagePlayback : MonoBehaviour {
 
     [HideInInspector] 
     public bool isLoaded = false;
@@ -98,8 +98,6 @@ public class ImageController : MonoBehaviour {
             elapsedTime += Time.deltaTime;
             if (elapsedTime >= timeExtension)
             {
-                //files = null;
-//                if (debugActive) Debug.Log("Checking for files...");
                 CheckForFiles(_folderName);
                 elapsedTime = 0f;
             }

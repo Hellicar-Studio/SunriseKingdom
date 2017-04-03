@@ -2,20 +2,37 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum PlaybackMode
+{
+    image,
+    video
+}
+
 public class GameController : MonoBehaviour {
 	
     public SunriseController sunrise;
     public VideoController video;
-    public ImageController image;
+    public ImagePlayback imagePlayback;
+    public VideoPlayback videoPlayback;
     public MediaPlayerCtrl liveStream;
-
-    public string videoURL = "rtsp://88.97.57.25:10001/axis-media/media.amp?videocodec=h264";
+    
+    [Header("Sunrise Data")]
     public string APIKey = "7f09e7d718a5c1dd8d39f1635ac7f006";
     public string city = "London";
-    public string checkSunriseTime = "03:00";
+    public string checkSunriseTimeAt = "03:00";
+    [Header("Live Stream")]
+    public string videoURL = "rtsp://88.97.57.25:10001/axis-media/media.amp?videocodec=h264";
     public string dataFolder = "Images";
     public float framesPerSecond = 25f;
     public float recordingMaxSeconds = 3600f;
+    [Header("Playback")]
+    public PlaybackMode playbackMode = PlaybackMode.video;
+    [Header("Playback - Video")]
+    public int maxVideos = 4;
+    public float cutAtSeconds = 60f;
+    public float loadAtSeconds = 30f;
+    public string fileExtension = ".mkv";
+    [Header("Support")]
     public bool debugActive = true;
     public bool simulationMode = false;
     public bool manualRecord = false;
@@ -26,7 +43,7 @@ public class GameController : MonoBehaviour {
     // Use this for initialization
     void Start () 
     {
-        Time.captureFramerate = (int)framesPerSecond;
+        //Time.captureFramerate = (int)framesPerSecond;
 
         // sunrise startup
         sunrise.APIKey = APIKey;
@@ -35,7 +52,14 @@ public class GameController : MonoBehaviour {
 
         // setup debug info
         sunrise.debugActive = debugActive;
-        image.debugActive = debugActive;
+        imagePlayback.debugActive = debugActive;
+        videoPlayback.debugActive = debugActive;
+
+        // setup video playback variables
+        videoPlayback.maxVideos = maxVideos;
+        videoPlayback.cutAtSeconds = cutAtSeconds;
+        videoPlayback.loadAtSeconds = loadAtSeconds;
+        videoPlayback.fileExtension = fileExtension;
 
         // setup video stream url
         liveStream.m_strFileName = videoURL;
@@ -48,8 +72,20 @@ public class GameController : MonoBehaviour {
 	void Update () 
     {
         SunSystem();
-        Capture();
-        Playback();
+        CaptureStream();
+
+        if (playbackMode == PlaybackMode.image)
+        {
+            PlaybackImage();
+            // disables all video playback renderers
+            videoPlayback.RenderMaterial(false);
+        }
+        else
+        {
+            PlaybackVideo();
+            // disables image playback renderer
+            imagePlayback.RenderMaterial(false);
+        }
 
         // on escape key up, unload media and quit app
         if (Input.GetKeyUp(KeyCode.Escape))
@@ -82,7 +118,7 @@ public class GameController : MonoBehaviour {
 
     private void SunSystem()
     {
-        if (sunrise.GetLocalTime() == checkSunriseTime)
+        if (sunrise.GetLocalTime() == checkSunriseTimeAt)
         {
             sunrise.GetSunriseTime();
         }
@@ -105,7 +141,7 @@ public class GameController : MonoBehaviour {
         }
     }
 
-    private void Capture()
+    private void CaptureStream()
     {
         if (!simulationMode)
         {
@@ -153,52 +189,94 @@ public class GameController : MonoBehaviour {
         }
     }
 
-    private void Playback()
+    private void PlaybackVideo()
     {
         if (!simulationMode)
         {
             if (isSunriseActive)
             {
-                if (image.isLoaded)
-                    image.isLoaded = false;
-
-                image.RenderMaterial(false);
+                if (videoPlayback.beginPlayback)
+                    videoPlayback.beginPlayback = false;
             }
             else
             {
-                if (!image.isLoaded)
+                if (!videoPlayback.beginPlayback)
                 {
-                    image.LoadImages(dataFolder);
+                    videoPlayback.BeginPlayback();
                 }
                 else
                 {
-                    image.PlayImages(framesPerSecond);
+                    videoPlayback.UpdatePlayer();
                 }
-
-                image.RenderMaterial(true);
             }
         }
         else
         {
             if (manualRecord)
             {
-                if (image.isLoaded)
-                    image.isLoaded = false;
-
-                image.RenderMaterial(false);
+                if (videoPlayback.beginPlayback)
+                    videoPlayback.beginPlayback = false;
             }
             else
             {
-                if (!image.isLoaded)
+                if (!videoPlayback.beginPlayback)
                 {
-                    image.LoadImages(dataFolder);
+                    videoPlayback.BeginPlayback();
                 }
                 else
                 {
-                    image.PlayImages(framesPerSecond);
+                    videoPlayback.UpdatePlayer();
+                }
+            }
+        }
+    }
+
+    private void PlaybackImage()
+    {
+        if (!simulationMode)
+        {
+            if (isSunriseActive)
+            {
+                if (imagePlayback.isLoaded)
+                    imagePlayback.isLoaded = false;
+
+                imagePlayback.RenderMaterial(false);
+            }
+            else
+            {
+                if (!imagePlayback.isLoaded)
+                {
+                    imagePlayback.LoadImages(dataFolder);
+                }
+                else
+                {
+                    imagePlayback.PlayImages(framesPerSecond);
                 }
 
-                image.RenderMaterial(true);
+                imagePlayback.RenderMaterial(true);
+            }
+        }
+        else
+        {
+            if (manualRecord)
+            {
+                if (imagePlayback.isLoaded)
+                    imagePlayback.isLoaded = false;
+
+                imagePlayback.RenderMaterial(false);
+            }
+            else
+            {
+                if (!imagePlayback.isLoaded)
+                {
+                    imagePlayback.LoadImages(dataFolder);
+                }
+                else
+                {
+                    imagePlayback.PlayImages(framesPerSecond);
+                }
+
+                imagePlayback.RenderMaterial(true);
             }
         }
     }
