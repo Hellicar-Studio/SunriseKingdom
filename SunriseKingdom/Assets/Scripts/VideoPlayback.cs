@@ -1,40 +1,111 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-//using UnityEngine.UI;
 using RenderHeads.Media.AVProVideo;
+using System.IO;
 
-public class PlaybackController : MonoBehaviour {
+public class VideoPlayback : MonoBehaviour {
 
     public MediaPlayer[] media;
     public Renderer[] rend;
-    //public Text timerUI;
-    public float maxSeconds = 60f;
+    [HideInInspector]
     public int maxVideos = 4;
+    [HideInInspector]
+    public float cutAtSeconds = 60f;
+    [HideInInspector]
     public float loadAtSeconds = 30f;
+    [HideInInspector]
     public string fileExtension = ".mkv";
+    [HideInInspector]
+    public bool beginPlayback = false;
+    [HideInInspector]
     public bool debugActive = false;
 
     private float elapsedTime;
     private int item = 1;
     private bool[] isLoaded;
+    private float timeExtension = 0f;
+    private int extCount = 0;
+    private bool filesExist = false;
+
+    // disables all object renderers
+    public void RenderMaterial(bool _active)
+    {
+        // if renderer is active
+        if (!_active)
+        {
+            // disable renderer if enabled
+            if (rend[0].enabled) rend[0].enabled = false;
+            if (rend[1].enabled) rend[1].enabled = false;
+        }
+    }
+
+    private void CheckForFiles(string _folderName)
+    {
+        if (debugActive) Debug.Log("Checking for video files...");
+
+        DirectoryInfo di = new DirectoryInfo(_folderName);
+        int fileCount = di.GetFiles("*" + fileExtension).Length;
+
+        if (fileCount != maxVideos)
+        {
+            filesExist = false;
+            extCount++;
+
+            if (extCount > 1)
+            {
+                timeExtension = 60f;
+            }
+            else
+            {
+                timeExtension = 0f;
+            }
+        }
+        else
+        {
+            filesExist = true;
+        }
+
+        if (debugActive) Debug.Log("Videos files found " + fileCount + ".");
+    }
 
     public void BeginPlayback()
     {
-        // default variables
-        item = 1;
-        elapsedTime = 0f;
-        isLoaded = new bool[media.Length];
+        if (filesExist)
+        {
+            // default variables
+            item = 1;
+            elapsedTime = 0f;
+            isLoaded = new bool[media.Length];
+            extCount = 0;
 
+            // toggle renderers
+            rend[0].enabled = true;
+            rend[1].enabled = false;
 
-        LoadVideo(0, 0);
-        PlayVideo(0);
+            // load and playback media
+            LoadVideo(0, 0);
+            PlayVideo(0);
+
+            // toggle playback flag
+            beginPlayback = true;
+        }
+        else
+        {
+            // check every 60 seconds
+            elapsedTime += Time.deltaTime;
+            if (elapsedTime >= timeExtension)
+            {
+                CheckForFiles(Application.streamingAssetsPath);
+                elapsedTime = 0f;
+            }
+        }
     }
 
     public void UpdatePlayer()
     {
         elapsedTime += Time.deltaTime;
-        if (elapsedTime >= maxSeconds)
+        if (elapsedTime >= cutAtSeconds)
         {
             item++;
             if (item > maxVideos - 1)
@@ -70,8 +141,6 @@ public class PlaybackController : MonoBehaviour {
         {
             LoadVideo(0, item);
         }
-
-        //timerUI.text = (int)elapsedTime + "";
     }
 
     private void LoadVideo(int player, int _item)
