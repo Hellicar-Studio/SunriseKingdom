@@ -19,6 +19,8 @@ public class VideoPlayback : MonoBehaviour {
     [HideInInspector]
     public bool beginPlayback = false;
     [HideInInspector]
+    public bool firstPlayback = true;
+    [HideInInspector]
     public bool debugActive = false;
 
     private float elapsedTime;
@@ -27,6 +29,7 @@ public class VideoPlayback : MonoBehaviour {
     private float timeExtension = 0f;
     private int extCount = 0;
     private bool filesExist = false;
+    private bool screenshotTaken = false;
 
     // disables all object renderers
     public void RenderMaterial(bool _active)
@@ -40,7 +43,7 @@ public class VideoPlayback : MonoBehaviour {
         }
     }
 
-    private void CheckForFiles(string _folderName)
+    private void CheckForVideoFiles(string _folderName)
     {
         if (debugActive) Debug.Log("Checking for video files...");
 
@@ -87,6 +90,9 @@ public class VideoPlayback : MonoBehaviour {
             LoadVideo(0, 0);
             PlayVideo(0);
 
+            // reset first playback flag
+            firstPlayback = true;
+
             // toggle playback flag
             beginPlayback = true;
         }
@@ -96,7 +102,7 @@ public class VideoPlayback : MonoBehaviour {
             elapsedTime += Time.deltaTime;
             if (elapsedTime >= timeExtension)
             {
-                CheckForFiles(Application.streamingAssetsPath);
+                CheckForVideoFiles(Application.streamingAssetsPath);
                 elapsedTime = 0f;
             }
         }
@@ -105,11 +111,22 @@ public class VideoPlayback : MonoBehaviour {
     public void UpdatePlayer()
     {
         elapsedTime += Time.deltaTime;
-        if (elapsedTime >= cutAtSeconds)
+
+        // gets current player and checks if it's finished
+        int player = (item + 1) % 2;
+        if (media[player].Control.IsFinished())
         {
+            if (debugActive)
+                Debug.Log("Player " + player + " has ended playback!");
+
+            // advance to the next video
+            // reset loop if we reach the end
             item++;
             if (item > maxVideos - 1)
             {
+                // disable screen capture
+                firstPlayback = false;
+                // reset items for looping
                 item = 0;
             }
 
@@ -141,6 +158,25 @@ public class VideoPlayback : MonoBehaviour {
         {
             LoadVideo(0, item);
         }
+
+        if (firstPlayback && !screenshotTaken && (int)elapsedTime == 150)
+        {
+            CaptureScreenshot();
+        }
+        else if ((int)elapsedTime != 150)
+        {
+            if (screenshotTaken) screenshotTaken = false;
+        }
+    }
+
+    private void CaptureScreenshot()
+    {
+        Application.CaptureScreenshot("Images/" + item + ".png");
+
+        if (debugActive)
+            Debug.Log("Screenshot has been saved!");
+
+        screenshotTaken = true;
     }
 
     private void LoadVideo(int player, int _item)

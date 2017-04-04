@@ -13,42 +13,43 @@ public class CameraController : MonoBehaviour {
         public string recordingID;
         public string startTime;
         public string stopTime;
-        public int startTimeInSeconds;
-        public int stopTimeInSeconds;
-        public int duration;
     }
 
     public bool StartRecordingButton; // Press me to Start Recording
     public bool StopRecordingButton; // Press me to Stop Recording
-    public bool ExportButton;   // Press me to export the video
+    public bool getFilePathButton; // Press me to get the file path of the most recent recording
+    public bool recordForDurationButton; //Press me to kick of a recording for a certain number of minutes specificed by the recordingDuration field
+
     public string CamIP = "192.168.1.201"; // Change me to external IP address
-    public string RecordingPath = "StreamingAssets\\Videos"; //Relative to the Assets Folder, this is where the recordings get saved and cleared
 
     private bool currentlyRecording;
     private string StartRecordingURL;
     private string StopRecordingURL;
     private string GetRecordingDetailsURL;
-    private WWW webResponse = null;
-    private bool needToDownload;
 
-    public int index;
+    public string newestPath;
 
-    public int recordingInterval;
-
+    private ArrayList allVideoFiles;
 
     RecordingDetails details;
+
+    private float timeRecordingStarted;
+    private bool recording;
+    public int recordingDuration;
+
+    public string recordingsRoot = "D:\\SunriseNAS";
 
     // Use this for initialization
     void Start () {
         StartRecordingURL = "http://" + CamIP + "/axis-cgi/io/virtualinput.cgi?action=6:/";
         StopRecordingURL = "http://" + CamIP + "/axis-cgi/io/virtualinput.cgi?action=6:%5C";
         GetRecordingDetailsURL = "http://" + CamIP + "/axis-cgi/record/list.cgi?recordingid=all";
-        webResponse = null;
-        needToDownload = false;
-
-        index = 0;
 
         details.collected = false;
+
+        allVideoFiles = new ArrayList();
+
+        newestPath = getRecordingPath(recordingsRoot);
     }
 
     // Update is called once per frame
@@ -56,36 +57,28 @@ public class CameraController : MonoBehaviour {
         if (StartRecordingButton && !currentlyRecording)
         {
             StartRecordingButton = false;
+            //StartRecordingURL = "http://root:pass@" + CamIP + "/axis-cgi/record/record.cgi?diskid=NetworkShare";
             StartRecording();
         }
 
         if (StopRecordingButton)
         {
+            getDetails();
             StopRecordingButton = false;
+            //StopRecordingURL = "http://root:pass@" + CamIP + "/axis-cgi/record/stop.cgi?recordingid=" + details.recordingID;
             StopRecording();
         }
 
-        if (ExportButton)
+        if(getFilePathButton)
         {
-            DownloadRecording();
+            newestPath = getRecordingPath(recordingsRoot);
+            getFilePathButton = false;
         }
 
-        if (webResponse != null)
+        if(recordForDurationButton)
         {
-            if (needToDownload && webResponse.isDone)
-            {
-                //Debug.Log(webResponse.text);
-                float newTime = Time.time;
-                Debug.Log(webResponse.bytes);
-                File.WriteAllBytes(Application.dataPath + "\\" + RecordingPath + "\\" + index.ToString() + ".mkv", webResponse.bytes);
-                index++;
-                needToDownload = false;
-                if(index <= details.duration / recordingInterval)
-                {
-                    Debug.Log("Starting Another Download!");
-                    getPropertiesAndExportRecording();
-                }
-            }
+            StartCoroutine(recordForDuration(recordingDuration));
+            recordForDurationButton = false;
         }
     }
 
@@ -94,6 +87,8 @@ public class CameraController : MonoBehaviour {
     {
         currentlyRecording = true;
         WWW www = new WWW(StartRecordingURL);
+        while (!www.isDone) { }
+        Debug.Log(www.text);
         return www;
     }
 
@@ -102,50 +97,18 @@ public class CameraController : MonoBehaviour {
     {
         currentlyRecording = false;
         WWW www = new WWW(StopRecordingURL);
+        while (!www.isDone) { }
+        Debug.Log(www.text);
         return www;
-    }
-
-    // Kick off the recursive download recording process
-    public void DownloadRecording()
-    {
-        getDetails();
-        getPropertiesAndExportRecording();
-    }
-
-    // get the start and stop time (known a properties) and export the next recording in that interval
-    void getPropertiesAndExportRecording()
-    {
-        if (details.collected)
-        {
-            ExportButton = false;
-            string propertiesURL = generateGetPropertiesURLAfterInterval(recordingInterval);
-            WWW www = new WWW(propertiesURL);
-            while (!www.isDone) { }
-            Debug.Log("Properties: " + www.text);
-            //string startTime = getStartTimeFromPropertiesXML(www.text);
-            string stopTime = getStopTimeFromPropertiesXML(www.text);
-            Debug.Log("StartTime: " + details.startTime);
-            Debug.Log("StopTime: " + stopTime);
-            ExportRecording(details.recordingID, details.startTime, stopTime);
-            details.startTime = stopTime;
-            float timeStart = Time.time;
-
-            needToDownload = true;
-        }
     }
 
     // Get the details of the most recent recording and save them in to the "details" object
     void getDetails()
     {
-        ClearFolder(Application.dataPath + "\\" +  RecordingPath);
-        details = GetRecordingDetails();
+        GetRecordingDetails();
         Debug.Log("Recording ID: " + details.recordingID);
         Debug.Log("Recording Start Time: " + details.startTime);
         Debug.Log("Recording End Time: " + details.stopTime);
-        Debug.Log("Recording Start Time Int: " + details.startTimeInSeconds);
-        Debug.Log("Recording End Time Int: " + details.stopTimeInSeconds);
-        Debug.Log("Start Time String From Conversion: " + convertTimeToString(details.startTimeInSeconds));
-        Debug.Log("Stop Time String From Conversion: " + convertTimeToString(details.stopTimeInSeconds));
 
         details.collected = true;
     }
@@ -153,7 +116,6 @@ public class CameraController : MonoBehaviour {
     // Get the recording details from the XML file returned by the web request
     RecordingDetails GetRecordingDetails()
     {
-        ExportButton = false;
         WWW www = new WWW(GetRecordingDetailsURL);
         while(!www.isDone) { }
         Debug.Log(www.text);
@@ -179,221 +141,97 @@ public class CameraController : MonoBehaviour {
         output.recordingID = newestID;
         output.startTime = newestStartTime;
         output.stopTime = newestStopTime;
-        output.startTimeInSeconds = convertTimeToInt(newestStartTime);
-        output.stopTimeInSeconds = convertTimeToInt(newestStopTime);
-        output.duration = output.stopTimeInSeconds - output.startTimeInSeconds;
 
         details.collected = true;
         return output;
     }
 
-    // Get the keyframe of the start time
-    string getStartTimeFromPropertiesXML(string xml)
+    void getMostRecentPath(string _root)
     {
-        return findAttributeInXML(xml, "Starttime");
-    }
-
-    // Get the keyframe of the stop time
-    string getStopTimeFromPropertiesXML(string xml)
-    {
-        return findAttributeInXML(xml, "Stoptime");
-    }
-
-    // find a particular attribute in an XML file
-    string findAttributeInXML(string xml, string attribute)
-    {
-        System.Xml.XmlTextReader reader = new System.Xml.XmlTextReader(new System.IO.StringReader(xml));
-        string value = "";
-        while (reader.Read())
+        DirectoryInfo di = new DirectoryInfo(_root);
+        FileInfo[] fi = di.GetFiles("*.mkv");
+        DirectoryInfo[] dis = di.GetDirectories();
+        for(int i = 0; i < fi.Length; i++)
         {
-            string newValue = reader.GetAttribute(attribute);
-
-            if (newValue != null)
-            {
-                value = newValue;
-            }
+            allVideoFiles.Add(fi[i].FullName);
         }
-        return value;
-    }
-
-    // Send the command to the camera to export a particular recording with a start and stop time specified.
-    void ExportRecording(string newestRecordingID, string startTime, string stopTime)
-    {
-        string ExportRecordingURL = "http://" + CamIP + "/axis-cgi/record/export/exportrecording.cgi?schemaversion=1&recordingid=" + newestRecordingID + "&diskid=SD_DISK&exportformat=matroska&starttime=" + startTime + "&stoptime=" + stopTime;
-        webResponse = new WWW(ExportRecordingURL);
-        needToDownload = true;
-    }
-
-    // Generate a new get properties URL for the next recording interval
-    string generateGetPropertiesURLAfterInterval(int interval)
-    {
-        string startDate = getDate(details.startTime);
-        string endDate = getDate(details.startTime);
-
-        if (startDate != endDate)
+        for(int i = 0; i < dis.Length; i++)
         {
-            Debug.Log("CameraController::generateStopTimeAtPercentage : You're start and end date don't match! that's weird and shouldn't happen, returning empty string!");
+            getMostRecentPath(dis[i].FullName);
+        }
+    }
+
+    public string getRecordingPath(string _root)
+    {
+        allVideoFiles.Clear();
+        getMostRecentPath(_root);
+        if(allVideoFiles.Count == 0)
+        {
+            Debug.Log("No .mkv files found in root!");
             return "";
         }
-
-        int start = convertTimeToInt(details.startTime);
-        int end = convertTimeToInt(details.stopTime);
-
-        int newEnd = start + interval;
-
-        if (newEnd > end)
+        int newestIndex = 0;
+        System.DateTime newestTime = new System.DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc); ;
+        for(int i = 0; i < allVideoFiles.Count; i++)
         {
-            newEnd = end;
-        }
-
-        string newEndString = startDate + "T" + convertTimeToString(newEnd) + "Z";
-
-        string getExportPropertiesURL = "http://" + CamIP + "/axis-cgi/record/export/properties.cgi?schemaversion=1&recordingid=" + details.recordingID + "&diskid=SD_DISK&exportformat=matroska&starttime=" + details.startTime + "&stoptime=" + newEndString;
-
-        return getExportPropertiesURL;
-    }
-
-    // Get the date from the web responce
-    string getDate(string timeString)
-    {
-        string[] dateAndTime = timeString.Split('T');
-        if (dateAndTime.Length > 0)
-        {
-            // The date is the first value and the time is the second, but of course we first checked if the second existed
-            string date = dateAndTime[0];
-            return date;
-        } else
-        {
-            Debug.Log("CameraController::getDate : 'T' was not a good seperator for the date and time, you'll need to find another solution, returning empty string");
-            return "";
-        }
-    }
-
-    // Convert an Axis formatted tim string to an integer amoutn of seconds
-    int convertTimeToInt(string timeString)
-    {
-        // First split it along date and time
-        string[] dateAndTime = timeString.Split('T');
-        if (dateAndTime.Length > 1)
-        {
-            // The date is the first valye and the time is the second, but of course we first checked if the second existed
-            string time = dateAndTime[1];
-            string[] timeParts = time.Split(':');
-            if (timeParts.Length > 2)
+            //Debug.Log("Path " + i.ToString() + ": " + allVideoFiles[i]);
+            string path = (string)allVideoFiles[i];
+            string date = getDateFromFilePath(path);
+            string time = getTimeFromFilePath(path);
+            int year = int.Parse(date.Remove(4, 4));
+            int month = int.Parse(date.Remove(0, 4).Remove(2, 2));
+            int day = int.Parse(date.Remove(0, 6));
+            int hour = int.Parse(time.Remove(2, 4));
+            int minute = int.Parse(time.Remove(0, 2).Remove(2, 2));
+            int second = int.Parse(time.Remove(0, 4));
+            //Debug.Log("Year " + i.ToString() + ": " + year);
+            //Debug.Log("Month " + i.ToString() + ": " + month);
+            //Debug.Log("Day " + i.ToString() + ": " + day);
+            //Debug.Log("Hour " + i.ToString() + ": " + hour);
+            //Debug.Log("Minute " + i.ToString() + ": " + minute);
+            //Debug.Log("Second " + i.ToString() + ": " + second);
+            System.DateTime dateTime = new System.DateTime(year, month, day, hour, minute, second, 0, System.DateTimeKind.Utc);
+            int compare = dateTime.CompareTo(newestTime);
+            if(compare > 0)
             {
-                string hours = timeParts[0];
-                string minutes = timeParts[1];
-                string secondsAndMillis = timeParts[2];
-                string[] secondsAndMillisParts = secondsAndMillis.Split('.');
-                if (secondsAndMillisParts.Length > 0)
-                {
-                    string seconds = secondsAndMillisParts[0];
-                    seconds = seconds.TrimEnd('Z');
-
-                    int hoursInSeconds;
-                    int minutesInSeconds;
-                    int secondsInSeconds;
-
-                    bool parsed = int.TryParse(hours, out hoursInSeconds);
-                    if (parsed)
-                    {
-                        hoursInSeconds *= 60 * 60;
-                    }
-                    else
-                    {
-                        Debug.Log("CameraController::convertTimeToInt : the hours field was mal-formed! returning -1");
-                        return -1;
-                    }
-                    parsed = int.TryParse(minutes, out minutesInSeconds);
-                    if (parsed)
-                    {
-                        minutesInSeconds *= 60;
-                    }
-                    else
-                    {
-                        Debug.Log("CameraController::convertTimeToInt : the minutes field was mal-formed! returning -1");
-                        return -1;
-                    }
-                    parsed = int.TryParse(seconds, out secondsInSeconds);
-                    if (parsed)
-                    {
-                        int totalTime = hoursInSeconds + minutesInSeconds + secondsInSeconds;
-                        return totalTime;
-                    }
-                    else
-                    {
-                        Debug.Log("CameraController::convertTimeToInt : the seconds field was mal-formed! it contained: " + seconds + " returning -1");
-                        return -1;
-                    }
-
-                }
-                else
-                {
-                    Debug.Log("CameraController::convertTimeToInt : '.' was not a good seperator for the seconds and milliseconds, you'll need to find another solution, returning -1");
-                    return -1;
-                }
+                newestTime = dateTime;
+                newestIndex = i;
             }
-            else
-            {
-                Debug.Log("CameraController::convertTimeToInt : ':' was not a good seperator for the time, you'll need to find another solution, returning -1");
-                return -1;
-            }
-
         }
-        else
-        {
-            Debug.Log("CameraController::convertTimeToInt : 'T' was not a good seperator between the time and the date, you'll need to find another solution, returning -1");
-            return -1;
-        }
+        return (string)allVideoFiles[newestIndex];
     }
 
-    // Convert an integer amount of seconds to an axis useable time string
-    string convertTimeToString(int timeDouble)
+    string getDateFromFilePath(string _path)
     {
-        double hoursDouble = timeDouble / 60 / 60;
-        int hoursInt = (int)hoursDouble;
-        int secondsInHours = hoursInt * 60 * 60;
-        timeDouble -= secondsInHours;
-
-        double minutesDouble = timeDouble / 60;
-        int minutesInt = (int)minutesDouble;
-        int secondsInMinutes = minutesInt * 60;
-
-        timeDouble -= secondsInMinutes;
-
-        double secondsDouble = timeDouble;
-
-        string hoursString = padWithZeros(hoursInt.ToString());
-        string minutesString = padWithZeros(minutesInt.ToString());
-        string secondsString = padWithZeros(secondsDouble.ToString());
-
-        string output = hoursString + ":" + minutesString + ":" + secondsString;
-
-        return output;
+        string[] extensionRemoved = _path.Split('.');
+        string[] pathRemoved = extensionRemoved[0].Split('\\');
+        string[] splitDateAndTime = pathRemoved[pathRemoved.Length - 1].Split('_');
+        string date = splitDateAndTime[0];
+        //Debug.Log("Date: " + date);
+        return date;
     }
 
-    // clears save folder and resets file index
-    void ClearFolder(string _folderName)
+    string getTimeFromFilePath(string _path)
     {
-        // reset index
-        if (index != 0) index = 0;
-
-        // access save folder directory
-        DirectoryInfo dir = new DirectoryInfo(_folderName);
-        // delete all files that exist
-        foreach (FileInfo fi in dir.GetFiles())
-        {
-            fi.Delete();
-        }
+        string[] extensionRemoved = _path.Split('.');
+        string[] pathRemoved = extensionRemoved[0].Split('\\');
+        string[] splitDateAndTime = pathRemoved[pathRemoved.Length - 1].Split('_');
+        string time = splitDateAndTime[1];
+        //Debug.Log("Time: " + time);
+        return time;
     }
 
-    // Pad a string number with 0s if it has only one digit
-    string padWithZeros(string num)
+    public IEnumerator recordForDuration(int _durationInSeconds)
     {
-        if(num.Length == 1)
+        timeRecordingStarted = Time.time;
+        StartRecording();
+        while(Time.time - timeRecordingStarted < _durationInSeconds)
         {
-            num = "0" + num;
+            //Debug.Log(Time.time - timeRecordingStarted);
+            yield return null;
         }
-        return num;
+        Debug.Log("Done Recording! Duration: " + _durationInSeconds.ToString());
+        StopRecording();
+        newestPath = getRecordingPath(recordingsRoot);
     }
 }
