@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections;
-
 using System.IO;
 
 
@@ -13,6 +12,17 @@ public class CameraController : MonoBehaviour {
         public string recordingID;
         public string startTime;
         public string stopTime;
+    }
+
+    struct PathDate
+    {
+        public string path;
+        public System.DateTime date;
+
+        public int CompareTo(PathDate _pathDate)
+        {
+            return date.CompareTo(_pathDate.date);
+        }
     }
 
     public bool StartRecordingButton; // Press me to Start Recording
@@ -37,6 +47,8 @@ public class CameraController : MonoBehaviour {
     private bool recording;
     public int recordingDuration;
 
+    public string[] mostRecentRecording;
+
     public string recordingsRoot = "D:\\SunriseNAS";
 
     // Use this for initialization
@@ -49,7 +61,14 @@ public class CameraController : MonoBehaviour {
 
         allVideoFiles = new ArrayList();
 
-        newestPath = getRecordingPath(recordingsRoot);
+        getRecordingPath(recordingsRoot);
+
+        mostRecentRecording = new string[12];
+
+        for(int i = 0; i < mostRecentRecording.Length; i++)
+        {
+            mostRecentRecording[i] = "";
+        }
     }
 
     // Update is called once per frame
@@ -71,7 +90,7 @@ public class CameraController : MonoBehaviour {
 
         if(getFilePathButton)
         {
-            newestPath = getRecordingPath(recordingsRoot);
+            getRecordingPath(recordingsRoot);
             getFilePathButton = false;
         }
 
@@ -161,17 +180,16 @@ public class CameraController : MonoBehaviour {
         }
     }
 
-    public string getRecordingPath(string _root)
+    public void getRecordingPath(string _root)
     {
         allVideoFiles.Clear();
         getMostRecentPath(_root);
         if(allVideoFiles.Count == 0)
         {
             Debug.Log("No .mkv files found in root!");
-            return "";
+            return;
         }
-        int newestIndex = 0;
-        System.DateTime newestTime = new System.DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc); ;
+        PathDate[] pathDates = new PathDate[allVideoFiles.Count];
         for(int i = 0; i < allVideoFiles.Count; i++)
         {
             //Debug.Log("Path " + i.ToString() + ": " + allVideoFiles[i]);
@@ -191,14 +209,41 @@ public class CameraController : MonoBehaviour {
             //Debug.Log("Minute " + i.ToString() + ": " + minute);
             //Debug.Log("Second " + i.ToString() + ": " + second);
             System.DateTime dateTime = new System.DateTime(year, month, day, hour, minute, second, 0, System.DateTimeKind.Utc);
-            int compare = dateTime.CompareTo(newestTime);
-            if(compare > 0)
+            pathDates[i].date = dateTime;
+            pathDates[i].path = (string)allVideoFiles[i];
+        }
+
+        for(int j = 0; j < pathDates.Length - 1; j++)
+        {
+            // Find the smallest
+            int iMin = j;
+            // test against elements after j to find the smallest
+            for(int i = j+1; i < pathDates.Length; i++)
             {
-                newestTime = dateTime;
-                newestIndex = i;
+                if(pathDates[i].CompareTo(pathDates[iMin]) > 0)
+                {
+                    iMin = i;
+                }
+            }
+
+            if(iMin != j)
+            {
+                PathDate temp = pathDates[iMin];
+                pathDates[iMin] = pathDates[j];
+                pathDates[j] = temp;
             }
         }
-        return (string)allVideoFiles[newestIndex];
+
+        for(int i = 0; i < pathDates.Length; i++)
+        {
+            if(i < mostRecentRecording.Length)
+            {
+                mostRecentRecording[i] = pathDates[i].path;
+            } else
+            {
+                break;
+            }
+        }
     }
 
     string getDateFromFilePath(string _path)
@@ -232,6 +277,6 @@ public class CameraController : MonoBehaviour {
         }
         Debug.Log("Done Recording! Duration: " + _durationInSeconds.ToString());
         StopRecording();
-        newestPath = getRecordingPath(recordingsRoot);
+        getRecordingPath(recordingsRoot);
     }
 }
