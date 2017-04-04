@@ -17,7 +17,9 @@ public class CameraController : MonoBehaviour {
 
     public bool StartRecordingButton; // Press me to Start Recording
     public bool StopRecordingButton; // Press me to Stop Recording
-    public bool getFilePath; // Press me to get the file path of the most recent recording
+    public bool getFilePathButton; // Press me to get the file path of the most recent recording
+    public bool recordForDurationButton; //Press me to kick of a recording for a certain number of minutes specificed by the recordingDuration field
+
     public string CamIP = "192.168.1.201"; // Change me to external IP address
 
     private bool currentlyRecording;
@@ -31,6 +33,12 @@ public class CameraController : MonoBehaviour {
 
     RecordingDetails details;
 
+    private float timeRecordingStarted;
+    private bool recording;
+    public int recordingDuration;
+
+    public string recordingsRoot = "D:\\SunriseNAS";
+
     // Use this for initialization
     void Start () {
         StartRecordingURL = "http://" + CamIP + "/axis-cgi/io/virtualinput.cgi?action=6:/";
@@ -40,6 +48,8 @@ public class CameraController : MonoBehaviour {
         details.collected = false;
 
         allVideoFiles = new ArrayList();
+
+        newestPath = getRecordingPath(recordingsRoot);
     }
 
     // Update is called once per frame
@@ -59,10 +69,16 @@ public class CameraController : MonoBehaviour {
             StopRecording();
         }
 
-        if(getFilePath)
+        if(getFilePathButton)
         {
-            newestPath = getRecordingPath("D:\\SunriseNAS");
-            getFilePath = false;
+            newestPath = getRecordingPath(recordingsRoot);
+            getFilePathButton = false;
+        }
+
+        if(recordForDurationButton)
+        {
+            StartCoroutine(recordForDuration(recordingDuration));
+            recordForDurationButton = false;
         }
     }
 
@@ -130,7 +146,7 @@ public class CameraController : MonoBehaviour {
         return output;
     }
 
-    void getRecordingMostRecentPath(string _root)
+    void getMostRecentPath(string _root)
     {
         DirectoryInfo di = new DirectoryInfo(_root);
         FileInfo[] fi = di.GetFiles("*.mkv");
@@ -141,14 +157,14 @@ public class CameraController : MonoBehaviour {
         }
         for(int i = 0; i < dis.Length; i++)
         {
-            getRecordingMostRecentPath(dis[i].FullName);
+            getMostRecentPath(dis[i].FullName);
         }
     }
 
     public string getRecordingPath(string _root)
     {
         allVideoFiles.Clear();
-        getRecordingMostRecentPath(_root);
+        getMostRecentPath(_root);
         if(allVideoFiles.Count == 0)
         {
             Debug.Log("No .mkv files found in root!");
@@ -158,7 +174,7 @@ public class CameraController : MonoBehaviour {
         System.DateTime newestTime = new System.DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc); ;
         for(int i = 0; i < allVideoFiles.Count; i++)
         {
-            Debug.Log("Path " + i.ToString() + ": " + allVideoFiles[i]);
+            //Debug.Log("Path " + i.ToString() + ": " + allVideoFiles[i]);
             string path = (string)allVideoFiles[i];
             string date = getDateFromFilePath(path);
             string time = getTimeFromFilePath(path);
@@ -168,12 +184,12 @@ public class CameraController : MonoBehaviour {
             int hour = int.Parse(time.Remove(2, 4));
             int minute = int.Parse(time.Remove(0, 2).Remove(2, 2));
             int second = int.Parse(time.Remove(0, 4));
-            Debug.Log("Year " + i.ToString() + ": " + year);
-            Debug.Log("Month " + i.ToString() + ": " + month);
-            Debug.Log("Day " + i.ToString() + ": " + day);
-            Debug.Log("Hour " + i.ToString() + ": " + hour);
-            Debug.Log("Minute " + i.ToString() + ": " + minute);
-            Debug.Log("Second " + i.ToString() + ": " + second);
+            //Debug.Log("Year " + i.ToString() + ": " + year);
+            //Debug.Log("Month " + i.ToString() + ": " + month);
+            //Debug.Log("Day " + i.ToString() + ": " + day);
+            //Debug.Log("Hour " + i.ToString() + ": " + hour);
+            //Debug.Log("Minute " + i.ToString() + ": " + minute);
+            //Debug.Log("Second " + i.ToString() + ": " + second);
             System.DateTime dateTime = new System.DateTime(year, month, day, hour, minute, second, 0, System.DateTimeKind.Utc);
             int compare = dateTime.CompareTo(newestTime);
             if(compare > 0)
@@ -191,7 +207,7 @@ public class CameraController : MonoBehaviour {
         string[] pathRemoved = extensionRemoved[0].Split('\\');
         string[] splitDateAndTime = pathRemoved[pathRemoved.Length - 1].Split('_');
         string date = splitDateAndTime[0];
-        Debug.Log("Date: " + date);
+        //Debug.Log("Date: " + date);
         return date;
     }
 
@@ -201,7 +217,21 @@ public class CameraController : MonoBehaviour {
         string[] pathRemoved = extensionRemoved[0].Split('\\');
         string[] splitDateAndTime = pathRemoved[pathRemoved.Length - 1].Split('_');
         string time = splitDateAndTime[1];
-        Debug.Log("Time: " + time);
+        //Debug.Log("Time: " + time);
         return time;
+    }
+
+    public IEnumerator recordForDuration(int _durationInSeconds)
+    {
+        timeRecordingStarted = Time.time;
+        StartRecording();
+        while(Time.time - timeRecordingStarted < _durationInSeconds)
+        {
+            //Debug.Log(Time.time - timeRecordingStarted);
+            yield return null;
+        }
+        Debug.Log("Done Recording! Duration: " + _durationInSeconds.ToString());
+        StopRecording();
+        newestPath = getRecordingPath(recordingsRoot);
     }
 }
