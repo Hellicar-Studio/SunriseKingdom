@@ -48,8 +48,6 @@ public class GameController : MonoBehaviour {
     // Use this for initialization
     void Start () 
     {
-        //Time.captureFramerate = (int)framesPerSecond;
-
         // sunrise startup
         sunrise.APIKey = APIKey;
         sunrise.city = city;
@@ -159,7 +157,7 @@ public class GameController : MonoBehaviour {
             if (isSunriseActive)
             {
                 if (!videoRecord.isRecording)
-                    videoRecord.BeginRecording();
+                    videoRecord.StartRecording();
             }
             else
             {
@@ -172,7 +170,7 @@ public class GameController : MonoBehaviour {
             if (manualRecord)
             {
                 if (!videoRecord.isRecording)
-                    videoRecord.BeginRecording();
+                    videoRecord.StartRecording();
             }
             else
             {

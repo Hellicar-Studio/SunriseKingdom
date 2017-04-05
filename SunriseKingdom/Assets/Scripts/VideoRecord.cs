@@ -57,7 +57,8 @@ public class VideoRecord : MonoBehaviour {
     public bool isRecording = false;
 
     // Use this for initialization
-    public void BeginRecording () {
+    public void Start()
+    {
         StartRecordingURL = "http://" + CamIP + "/axis-cgi/io/virtualinput.cgi?action=6:/";
         StopRecordingURL = "http://" + CamIP + "/axis-cgi/io/virtualinput.cgi?action=6:%5C";
         GetRecordingDetailsURL = "http://" + CamIP + "/axis-cgi/record/list.cgi?recordingid=all";
@@ -66,17 +67,10 @@ public class VideoRecord : MonoBehaviour {
 
         allVideoFiles = new ArrayList();
 
-        //getRecordingPath(recordingsRoot);
-
         mostRecentRecording = null;
         mostRecentRecording = new string[12];
 
-        //for(int i = 0; i < mostRecentRecording.Length; i++)
-        //{
-        //    mostRecentRecording[i] = "";
-        //}
-
-        StartRecording();
+        getRecordingPath(recordingsRoot);
     }
 
     /*
@@ -112,8 +106,11 @@ public class VideoRecord : MonoBehaviour {
     */
 
     // Start a new Recording (on the camera)
-    private WWW StartRecording()
+    public WWW StartRecording()
     {
+        mostRecentRecording = null;
+        mostRecentRecording = new string[12];
+
         WWW www = new WWW(StartRecordingURL);
         while (!www.isDone) { }
         if (debugActive)
