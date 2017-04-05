@@ -8,7 +8,16 @@ using System.Security.Cryptography.X509Certificates;
 
 public class ImageEmailer : MonoBehaviour
 {
+    public string fromAddress = "from@email.here";
+    public string toAddress = "to@email.here";
+    public string subject = "Image from Sunrise Kingdom";
+    public string messageBody = "";
+    public string password = "";
+    public string SMTPServer = "smtp.gmail.com";
+    public int SMTPPort = 587;
+
     public bool emailSent = false;
+    public bool debugActive = false;
 
     void Update()
     {
@@ -22,21 +31,26 @@ public class ImageEmailer : MonoBehaviour
     {
         MailMessage mail = new MailMessage();
 
-        mail.From = new MailAddress("jason@glitchbeam.com");
-        mail.To.Add("jason@glitchbeam.com");
-        mail.CC.Add("james@hellicarstudio.com");
-        mail.Subject = "Email from Sunrise Kingdom";
-        mail.Body = ":-)";
+        mail.From = new MailAddress(fromAddress);
+        mail.To.Add(toAddress);
+        mail.Subject = subject;
+        mail.Body = messageBody;
 
-        SmtpClient smtpServer = new SmtpClient("smtp.gmail.com");
-        smtpServer.Port = 587;
-        smtpServer.Credentials = new System.Net.NetworkCredential("jason@glitchbeam.com", "Ustepski76jaW") as ICredentialsByHost;
+        string attachmentPath = @"D:\SunriseData\Images\0.png";
+        System.Net.Mail.Attachment attachment = new System.Net.Mail.Attachment(attachmentPath);
+        mail.Attachments.Add(attachment);
+
+        SmtpClient smtpServer = new SmtpClient(SMTPServer);
+        smtpServer.Port = SMTPPort;
+        smtpServer.Credentials = new System.Net.NetworkCredential(fromAddress, password) as ICredentialsByHost;
         smtpServer.EnableSsl = true;
         ServicePointManager.ServerCertificateValidationCallback =
             delegate (object s, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
             { return true; };
         smtpServer.Send(mail);
-        Debug.Log("success");
+
+        if (debugActive)
+            Debug.Log("Email has been successfully sent!");
 
         emailSent = false;
     }
