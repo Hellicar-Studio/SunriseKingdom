@@ -11,9 +11,10 @@ public enum PlaybackMode
 public class GameController : MonoBehaviour {
 	
     public SunriseController sunrise;
-    public VideoController video;
+    public VideoStream videoStream;
     public ImagePlayback imagePlayback;
     public VideoPlayback videoPlayback;
+    public VideoRecord videoRecord;
     public MediaPlayerCtrl liveStream;
     
     [Header("Sunrise Data")]
@@ -22,14 +23,18 @@ public class GameController : MonoBehaviour {
     public string checkSunriseTimeAt = "03:00";
     [Header("Live Stream")]
     public string videoURL = "rtsp://88.97.57.25:10001/axis-media/media.amp?videocodec=h264";
-    public string dataFolder = "Images";
     public float framesPerSecond = 25f;
     public float recordingMaxSeconds = 3600f;
+    [Header("Data Folders")]
+    public string videoFolder = "D:\\SunriseData/Images/";
+    public string imagesFolder = "D:\\SunriseData/Images/";
+    [Header("Recorder")]
+    public string cameraIP = "192.168.1.201";
+
     [Header("Playback")]
     public PlaybackMode playbackMode = PlaybackMode.video;
     [Header("Playback - Video")]
     public int maxVideos = 4;
-    public float cutAtSeconds = 60f;
     public float loadAtSeconds = 30f;
     public string fileExtension = ".mkv";
     [Header("Support")]
@@ -52,27 +57,33 @@ public class GameController : MonoBehaviour {
 
         // setup debug info
         sunrise.debugActive = debugActive;
+        videoRecord.debugActive = debugActive;
         imagePlayback.debugActive = debugActive;
         videoPlayback.debugActive = debugActive;
 
         // setup video playback variables
         videoPlayback.maxVideos = maxVideos;
-        videoPlayback.cutAtSeconds = cutAtSeconds;
         videoPlayback.loadAtSeconds = loadAtSeconds;
         videoPlayback.fileExtension = fileExtension;
+        videoPlayback.videoFolder = videoFolder;
+        videoPlayback.imagesFolder = imagesFolder;
+
+        // setup video recorder variables
+        videoRecord.CamIP = cameraIP;
+        videoRecord.recordingsRoot = videoFolder;
 
         // setup video stream url
         liveStream.m_strFileName = videoURL;
 
         // sync seconds
-        video.recordingMaxSeconds = recordingMaxSeconds;
+        videoStream.recordingMaxSeconds = recordingMaxSeconds;
     }
 
 	// Update is called once per frame
 	void Update () 
     {
         SunSystem();
-        CaptureStream();
+        VideoStream();
 
         if (playbackMode == PlaybackMode.image)
         {
@@ -141,50 +152,84 @@ public class GameController : MonoBehaviour {
         }
     }
 
-    private void CaptureStream()
+    private void RecordVideo()
     {
         if (!simulationMode)
         {
             if (isSunriseActive)
             {
-                if (!video.isFolderClear)
-                {
-                    video.ClearFolder(dataFolder);
-                }
-                else
-                {
-                    video.VideoRecord(dataFolder, framesPerSecond);
-                    video.RenderMaterial(true);
-                }
+                if (!videoRecord.isRecording)
+                    videoRecord.BeginRecording();
             }
             else
             {
-                if (video.isFolderClear)
-                    video.isFolderClear = false;
-
-                video.RenderMaterial(false);
+                if (videoRecord.isRecording)
+                    videoRecord.StopRecording();
             }
         }
         else
         {
             if (manualRecord)
             {
-                if (!video.isFolderClear)
-                {
-                    video.ClearFolder(dataFolder);
-                }
-                else
-                {
-                    video.VideoRecord(dataFolder, framesPerSecond);
-                    video.RenderMaterial(true);
-                }
+                if (!videoRecord.isRecording)
+                    videoRecord.BeginRecording();
             }
             else
             {
-                if (video.isFolderClear)
-                    video.isFolderClear = false;
+                if (videoRecord.isRecording)
+                    videoRecord.StopRecording();
+            }
+        }
+    }
 
-                video.RenderMaterial(false);
+    private void VideoStream()
+    {
+        if (!simulationMode)
+        {
+            if (isSunriseActive)
+            {
+                videoStream.RenderMaterial(true);
+
+                //if (!videoStream.isFolderClear)
+                //{
+                //    videoStream.ClearFolder(videoFolder);
+                //}
+                //else
+                //{
+                //    videoStream.VideoRecord(videoFolder, framesPerSecond);
+                //    videoStream.RenderMaterial(true);
+                //}
+            }
+            else
+            {
+                //if (videoStream.isFolderClear)
+                //    videoStream.isFolderClear = false;
+
+                videoStream.RenderMaterial(false);
+            }
+        }
+        else
+        {
+            if (manualRecord)
+            {
+                videoStream.RenderMaterial(true);
+
+                //if (!videoStream.isFolderClear)
+                //{
+                //    videoStream.ClearFolder(videoFolder);
+                //}
+                //else
+                //{
+                //    videoStream.VideoRecord(videoFolder, framesPerSecond);
+                //    videoStream.RenderMaterial(true);
+                //}
+            }
+            else
+            {
+                //if (videoStream.isFolderClear)
+                //    videoStream.isFolderClear = false;
+
+                videoStream.RenderMaterial(false);
             }
         }
     }
@@ -246,7 +291,7 @@ public class GameController : MonoBehaviour {
             {
                 if (!imagePlayback.isLoaded)
                 {
-                    imagePlayback.LoadImages(dataFolder);
+                    imagePlayback.LoadImages(imagesFolder);
                 }
                 else
                 {
@@ -269,7 +314,7 @@ public class GameController : MonoBehaviour {
             {
                 if (!imagePlayback.isLoaded)
                 {
-                    imagePlayback.LoadImages(dataFolder);
+                    imagePlayback.LoadImages(imagesFolder);
                 }
                 else
                 {

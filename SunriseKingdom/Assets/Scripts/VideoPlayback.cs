@@ -11,11 +11,13 @@ public class VideoPlayback : MonoBehaviour {
     [HideInInspector]
     public int maxVideos = 4;
     [HideInInspector]
-    public float cutAtSeconds = 60f;
-    [HideInInspector]
     public float loadAtSeconds = 30f;
     [HideInInspector]
     public string fileExtension = ".mkv";
+    [HideInInspector]
+    public string videoFolder = "D:\\SunriseData/Images/";
+    [HideInInspector]
+    public string imagesFolder = "D:\\SunriseData/Images/";
     [HideInInspector]
     public bool beginPlayback = false;
     [HideInInspector]
@@ -43,15 +45,14 @@ public class VideoPlayback : MonoBehaviour {
         }
     }
 
-    private void CheckForVideoFiles(string _folderName)
+    private void CheckForVideoFiles(string[] _dataFolder)
     {
         if (debugActive) Debug.Log("Checking for video files...");
 
-        DirectoryInfo di = new DirectoryInfo(_folderName);
-        int fileCount = di.GetFiles("*" + fileExtension).Length;
 
-        if (fileCount != maxVideos)
+        if (_dataFolder == null)
         {
+            if (debugActive) Debug.Log("File paths were empty!  Will check again in 60seconds.");
             filesExist = false;
             extCount++;
 
@@ -66,10 +67,35 @@ public class VideoPlayback : MonoBehaviour {
         }
         else
         {
+            if (debugActive) Debug.Log("File paths are ready!");
             filesExist = true;
         }
 
-        if (debugActive) Debug.Log("Videos files found " + fileCount + ".");
+        //DirectoryInfo di = new DirectoryInfo(_dataFolder);
+        //int fileCount = di.GetFiles("*" + fileExtension).Length;
+
+        //if (fileCount != maxVideos)
+        //{
+        //    filesExist = false;
+        //    extCount++;
+
+        //    if (extCount > 1)
+        //    {
+        //        timeExtension = 60f;
+        //    }
+        //    else
+        //    {
+        //        timeExtension = 0f;
+        //    }
+
+        //    if (debugActive) Debug.Log("Incorrect amount or no videos were found!");
+        //}
+        //else
+        //{
+        //    filesExist = true;
+        //}
+
+        //if (debugActive) Debug.Log("Videos files found " + fileCount + ".");
     }
 
     public void BeginPlayback()
@@ -87,7 +113,7 @@ public class VideoPlayback : MonoBehaviour {
             rend[1].enabled = false;
 
             // load and playback media
-            LoadVideo(0, 0);
+            LoadVideo(0, 0, VideoRecord.mostRecentRecording);
             PlayVideo(0);
 
             // reset first playback flag
@@ -102,7 +128,7 @@ public class VideoPlayback : MonoBehaviour {
             elapsedTime += Time.deltaTime;
             if (elapsedTime >= timeExtension)
             {
-                CheckForVideoFiles(Application.streamingAssetsPath);
+                CheckForVideoFiles(VideoRecord.mostRecentRecording); // Application.streamingAssetsPath);
                 elapsedTime = 0f;
             }
         }
@@ -152,11 +178,11 @@ public class VideoPlayback : MonoBehaviour {
 
         if (!media[0].Control.IsFinished() && (int)elapsedTime == loadAtSeconds && !isLoaded[1])
         {
-            LoadVideo(1, item);
+            LoadVideo(1, item, VideoRecord.mostRecentRecording);
         }
         else if (!media[1].Control.IsFinished() && (int)elapsedTime == loadAtSeconds && !isLoaded[0])
         {
-            LoadVideo(0, item);
+            LoadVideo(0, item, VideoRecord.mostRecentRecording);
         }
 
         if (firstPlayback && !screenshotTaken && (int)elapsedTime == 150)
@@ -171,31 +197,31 @@ public class VideoPlayback : MonoBehaviour {
 
     private void CaptureScreenshot()
     {
-        Application.CaptureScreenshot("Images/" + item + ".png");
+        Application.CaptureScreenshot(imagesFolder + item + ".png");
 
         if (debugActive)
-            Debug.Log("Screenshot has been saved!");
+            Debug.Log("Screenshot " + item + ".png has been saved!");
 
         screenshotTaken = true;
     }
 
-    private void LoadVideo(int player, int _item)
+    private void LoadVideo(int player, int _item, string[] _filePath)
     {
-        int itemCorrected = _item + 1;
-        if (itemCorrected > maxVideos-1)
-        {
-            itemCorrected = 0;
-        }
+        //int itemCorrected = _item + 1;
+        //if (itemCorrected > maxVideos-1)
+        //{
+        //    itemCorrected = 0;
+        //}
 
-        string fileName = _item.ToString() + fileExtension;
-        media[player].OpenVideoFromFile(media[player].m_VideoLocation, fileName);
+        string fileName = _filePath[(maxVideos-1) - _item]; //videoFolder + _item.ToString() + fileExtension;
+        media[player].OpenVideoFromFile(MediaPlayer.FileLocation.AbsolutePathOrURL, fileName);
         media[player].m_AutoStart = false;
         isLoaded[player] = true;
 
         if (debugActive)
         {
             Debug.Log("Loading MediaPlayer " + player);
-            Debug.Log("Loading Video " + itemCorrected);
+            //Debug.Log("Loading Video " + itemCorrected);
         }
     }
 
