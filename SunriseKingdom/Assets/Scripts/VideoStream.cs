@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 
-public class VideoController : MonoBehaviour {
+public class VideoStream : MonoBehaviour {
 
     [HideInInspector] 
     public bool isFolderClear = false;
