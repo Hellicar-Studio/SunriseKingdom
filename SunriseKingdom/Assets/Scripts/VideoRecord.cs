@@ -114,7 +114,10 @@ public class VideoRecord : MonoBehaviour {
         WWW www = new WWW(StartRecordingURL);
         while (!www.isDone) { }
         if (debugActive)
+        {
+            Debug.Log("Recording has started!");
             Debug.Log(www.text);
+        }
         isRecording = true;
         return www;
     }
@@ -125,7 +128,10 @@ public class VideoRecord : MonoBehaviour {
         WWW www = new WWW(StopRecordingURL);
         while (!www.isDone) { }
         if (debugActive)
+        {
+            Debug.Log("Recording has stopped!");
             Debug.Log(www.text);
+        }
         getRecordingPath(recordingsRoot);
         isRecording = false;
         return www;

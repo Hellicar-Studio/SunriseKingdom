@@ -12,8 +12,8 @@ public class VideoPlayback : MonoBehaviour {
     public int maxVideos = 4;
     [HideInInspector]
     public float loadAtSeconds = 30f;
-    [HideInInspector]
-    public string fileExtension = ".mkv";
+    //[HideInInspector]
+    //public string fileExtension = ".mkv";
     [HideInInspector]
     public string videoFolder = "D:\\SunriseData/Images/";
     [HideInInspector]
