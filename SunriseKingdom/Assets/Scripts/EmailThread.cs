@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
+//using System.Collections;
 using System.Threading;
 using System.Net;
 using System.Net.Mail;
@@ -8,15 +8,18 @@ using System.Security.Cryptography.X509Certificates;
 
 public class EmailThread : MonoBehaviour
 {
+    public static bool emailSent = false;
+    public static int item = 0;
+    public static string imagesFolder;
+
     #region Public data
     public string fromAddress = "from@email.here";
     public string toAddress = "to@email.here";
-    public string subject = "Image from Sunrise Kingdom";
+    public string subject = "Sunrise Kingdom - Screenshot";
     public string messageBody = "";
     public string password = "";
     public string SMTPServer = "smtp.gmail.com";
     public int SMTPPort = 587;
-    public bool emailSent = false;
     public bool debugActive = false;
     #endregion
 
@@ -70,10 +73,11 @@ public class EmailThread : MonoBehaviour
 
         mail.From = new MailAddress(fromAddress);
         mail.To.Add(toAddress);
-        mail.Subject = subject;
+        mail.Subject = subject + " " + item + ".png";
         mail.Body = messageBody;
 
-        string attachmentPath = @"D:\SunriseData\Images\0.png";
+        string attachmentPath = imagesFolder + item + ".png"; //@"D:\SunriseData\Images\0.png";
+        //string attachmentPath = @"D:\SunriseData\Images\0.png";
         System.Net.Mail.Attachment attachment = new System.Net.Mail.Attachment(attachmentPath);
         mail.Attachments.Add(attachment);
 
@@ -87,7 +91,7 @@ public class EmailThread : MonoBehaviour
         smtpServer.Send(mail);
 
         if (debugActive)
-            Debug.Log("Email has been successfully sent!");
+            Debug.Log("Email "+ item + " has been successfully sent!");
         
         // pauses the thread and stops
         _t1Paused = true;

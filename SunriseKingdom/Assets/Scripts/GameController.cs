@@ -1,12 +1,12 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿//using System.Collections;
+//using System.Collections.Generic;
 using UnityEngine;
 
-public enum PlaybackMode
-{
-    image,
-    video
-}
+//public enum PlaybackMode
+//{
+//    image,
+//    video
+//}
 
 public class GameController : MonoBehaviour {
 	
@@ -25,7 +25,7 @@ public class GameController : MonoBehaviour {
     public string videoURL = "rtsp://88.97.57.25:10001/axis-media/media.amp?videocodec=h264";
     //public float framesPerSecond = 25f;
     [Header("Data Folders")]
-    public string videoFolder = "D:\\SunriseData/Images/";
+    public string videoFolder = "D:\\SunriseData/Videos/";
     public string imagesFolder = "D:\\SunriseData/Images/";
     [Header("Recorder")]
     public string cameraIP = "192.168.1.201";
@@ -57,6 +57,9 @@ public class GameController : MonoBehaviour {
         videoRecord.debugActive = debugActive;
         //imagePlayback.debugActive = debugActive;
         videoPlayback.debugActive = debugActive;
+
+        // emailer
+        EmailThread.imagesFolder = imagesFolder;
 
         // setup video playback variables
         //videoPlayback.maxVideos = maxVideos;
@@ -247,6 +250,7 @@ public class GameController : MonoBehaviour {
             {
                 if (!videoPlayback.beginPlayback)
                 {
+                    videoPlayback.firstPlayback = true;
                     videoPlayback.BeginPlayback();
                 }
                 else
@@ -266,6 +270,7 @@ public class GameController : MonoBehaviour {
             {
                 if (!videoPlayback.beginPlayback)
                 {
+                    videoPlayback.firstPlayback = true;
                     videoPlayback.BeginPlayback();
                 }
                 else

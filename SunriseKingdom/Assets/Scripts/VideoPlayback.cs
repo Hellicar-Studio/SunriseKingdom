@@ -1,8 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿//using System.Collections;
+//using System.Collections.Generic;
 using UnityEngine;
 using RenderHeads.Media.AVProVideo;
-using System.IO;
+//using System.IO;
 
 public class VideoPlayback : MonoBehaviour {
 
@@ -24,6 +24,11 @@ public class VideoPlayback : MonoBehaviour {
     public bool firstPlayback = true;
     [HideInInspector]
     public bool debugActive = false;
+
+    //controls
+    public bool play = false;
+    public bool stop = false;
+    public bool pause = false;
 
     private float elapsedTime;
     private int item = 1;
@@ -116,9 +121,6 @@ public class VideoPlayback : MonoBehaviour {
             LoadVideo(0, 0, VideoRecord.mostRecentRecording);
             PlayVideo(0);
 
-            // reset first playback flag
-            firstPlayback = true;
-
             // toggle playback flag
             beginPlayback = true;
         }
@@ -136,6 +138,8 @@ public class VideoPlayback : MonoBehaviour {
 
     public void UpdatePlayer()
     {
+        MediaControls();
+
         elapsedTime += Time.deltaTime;
 
         // gets current player and checks if it's finished
@@ -176,6 +180,7 @@ public class VideoPlayback : MonoBehaviour {
             elapsedTime = 0f;
         }
 
+        // loads the correct video for the right player
         if (!media[0].Control.IsFinished() && (int)elapsedTime == loadAtSeconds && !isLoaded[1])
         {
             LoadVideo(1, item, VideoRecord.mostRecentRecording);
@@ -185,13 +190,58 @@ public class VideoPlayback : MonoBehaviour {
             LoadVideo(0, item, VideoRecord.mostRecentRecording);
         }
 
-        if (firstPlayback && !screenshotTaken && (int)elapsedTime == 150)
+        // on first playback capture 1 screenshot for each video at a specific time
+        if (firstPlayback && !screenshotTaken && (int)elapsedTime == loadAtSeconds)
         {
             CaptureScreenshot();
         }
-        else if ((int)elapsedTime != 150)
+        else if ((int)elapsedTime != loadAtSeconds)
         {
             if (screenshotTaken) screenshotTaken = false;
+        }
+
+        // on first playback send emails of the screenshots 10 seconds at the capture is taken
+        if (firstPlayback && !EmailThread.emailSent && (int)elapsedTime == loadAtSeconds + 10)
+        {
+            SendEmail();
+        }
+    }
+
+    public void MediaControls()
+    {
+        int player = (item + 1) % 2;
+        // play media
+        if (!media[player].Control.IsPlaying() && play)
+        {
+            media[player].Control.Play();
+
+            // reset toggles
+            stop = false;
+            pause = false;
+        }
+
+        // stop the system and reset
+        if (media[player].Control.IsPlaying() && stop)
+        {
+            // reset system variables
+            BeginPlayback();
+
+            // restart paused
+            pause = true;
+
+            // reset toggles
+            play = false;
+            stop = false;
+        }
+
+        // pause the system
+        if (media[player].Control.IsPlaying() && pause)
+        {
+            media[player].Control.Pause();
+
+            // reset toggles
+            stop = false;
+            play = false;
         }
     }
 
@@ -203,6 +253,17 @@ public class VideoPlayback : MonoBehaviour {
             Debug.Log("Screenshot " + item + ".png has been saved!");
 
         screenshotTaken = true;
+    }
+
+    private void SendEmail()
+    {
+        int itemCorrected = item - 1;
+        if (itemCorrected == -1)
+        {
+            itemCorrected = maxVideos - 1;
+        }
+        EmailThread.item = itemCorrected;
+        if (!EmailThread.emailSent) EmailThread.emailSent = true;
     }
 
     private void LoadVideo(int player, int _item, string[] _filePath)
