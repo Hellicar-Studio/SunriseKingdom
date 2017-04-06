@@ -68,6 +68,7 @@ public class GameController : MonoBehaviour {
         // setup video recorder variables
         videoRecord.CamIP = cameraIP;
         videoRecord.recordingsRoot = videoFolder;
+        videoRecord.maxVideos = (int)Mathf.Max(2, recordingMaxSeconds / 300.0f);
 
         // setup video stream url
         liveStream.m_strFileName = videoURL;

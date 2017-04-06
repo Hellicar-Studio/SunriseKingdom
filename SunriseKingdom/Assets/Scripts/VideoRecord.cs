@@ -40,7 +40,8 @@ public class VideoRecord : MonoBehaviour {
     private string StopRecordingURL;
     private string GetRecordingDetailsURL;
 
-    public string newestPath;
+    [HideInInspector]
+    public int maxVideos; //This is set by the GameController
 
     private ArrayList allVideoFiles;
 
@@ -48,7 +49,6 @@ public class VideoRecord : MonoBehaviour {
 
     private float timeRecordingStarted;
     private bool recording;
-    public int recordingDuration;
     public string[] mostRecentRecordingCopy;
     public static string[] mostRecentRecording;
     [HideInInspector]
@@ -70,6 +70,7 @@ public class VideoRecord : MonoBehaviour {
         mostRecentRecording = null;
 
         getRecordingPath(recordingsRoot);
+        
     }
 
     private void Update()
@@ -259,7 +260,7 @@ public class VideoRecord : MonoBehaviour {
             }
         }
 
-        mostRecentRecording = new string[(pathDates.Length > 12 ? 12 : pathDates.Length)];
+        mostRecentRecording = new string[(pathDates.Length > maxVideos ? maxVideos : pathDates.Length)];
 
         for(int i = 0; i < pathDates.Length; i++)
         {
@@ -303,20 +304,5 @@ public class VideoRecord : MonoBehaviour {
         string time = splitDateAndTime[1];
         //Debug.Log("Time: " + time);
         return time;
-    }
-
-    public IEnumerator recordForDuration(int _durationInSeconds)
-    {
-        timeRecordingStarted = Time.time;
-        StartRecording();
-        while(Time.time - timeRecordingStarted < _durationInSeconds)
-        {
-            //Debug.Log(Time.time - timeRecordingStarted);
-            yield return null;
-        }
-        if (debugActive)
-            Debug.Log("Done Recording! Duration: " + _durationInSeconds.ToString());
-        StopRecording();
-        getRecordingPath(recordingsRoot);
     }
 }
