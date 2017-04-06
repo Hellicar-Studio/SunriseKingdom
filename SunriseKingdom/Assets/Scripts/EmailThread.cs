@@ -47,7 +47,6 @@ public class EmailThread : MonoBehaviour
                 Thread.Sleep(200);
             }
             while (_t1Paused);
-            
         }
     }
 
@@ -90,6 +89,7 @@ public class EmailThread : MonoBehaviour
         if (debugActive)
             Debug.Log("Email has been successfully sent!");
         
+        // pauses the thread and stops
         _t1Paused = true;
         emailSent = false;
     }

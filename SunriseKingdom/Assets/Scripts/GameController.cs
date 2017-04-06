@@ -23,20 +23,19 @@ public class GameController : MonoBehaviour {
     public string checkSunriseTimeAt = "03:00";
     [Header("Live Stream")]
     public string videoURL = "rtsp://88.97.57.25:10001/axis-media/media.amp?videocodec=h264";
-    public float framesPerSecond = 25f;
-    public float recordingMaxSeconds = 3600f;
+    //public float framesPerSecond = 25f;
     [Header("Data Folders")]
     public string videoFolder = "D:\\SunriseData/Images/";
     public string imagesFolder = "D:\\SunriseData/Images/";
     [Header("Recorder")]
     public string cameraIP = "192.168.1.201";
-
-    [Header("Playback")]
-    public PlaybackMode playbackMode = PlaybackMode.video;
+    public float recordingMaxSeconds = 3600f;
+    //[Header("Playback")]
+    //public PlaybackMode playbackMode = PlaybackMode.video;
     [Header("Playback - Video")]
-    public int maxVideos = 4;
-    public float loadAtSeconds = 30f;
-    public string fileExtension = ".mkv";
+    public int maxVideos = 12;
+    public float loadAtSeconds = 150f;
+    //public string fileExtension = ".mkv";
     [Header("Support")]
     public bool debugActive = true;
     public bool simulationMode = false;
@@ -56,13 +55,13 @@ public class GameController : MonoBehaviour {
         // setup debug info
         sunrise.debugActive = debugActive;
         videoRecord.debugActive = debugActive;
-        imagePlayback.debugActive = debugActive;
+        //imagePlayback.debugActive = debugActive;
         videoPlayback.debugActive = debugActive;
 
         // setup video playback variables
         videoPlayback.maxVideos = maxVideos;
         videoPlayback.loadAtSeconds = loadAtSeconds;
-        videoPlayback.fileExtension = fileExtension;
+        //videoPlayback.fileExtension = fileExtension;
         videoPlayback.videoFolder = videoFolder;
         videoPlayback.imagesFolder = imagesFolder;
 
@@ -80,21 +79,24 @@ public class GameController : MonoBehaviour {
 	// Update is called once per frame
 	void Update () 
     {
+        // main systems
         SunSystem();
         VideoStream();
+        RecordVideo();
+        PlaybackVideo();
 
-        if (playbackMode == PlaybackMode.image)
-        {
-            PlaybackImage();
-            // disables all video playback renderers
-            videoPlayback.RenderMaterial(false);
-        }
-        else
-        {
-            PlaybackVideo();
-            // disables image playback renderer
-            imagePlayback.RenderMaterial(false);
-        }
+        //if (playbackMode == PlaybackMode.image)
+        //{
+        //    PlaybackImage();
+        //    // disables all video playback renderers
+        //    videoPlayback.RenderMaterial(false);
+        //}
+        //else
+        //{
+        //    PlaybackVideo();
+        //    // disables image playback renderer
+        //    imagePlayback.RenderMaterial(false);
+        //}
 
         // on escape key up, unload media and quit app
         if (Input.GetKeyUp(KeyCode.Escape))
@@ -112,9 +114,8 @@ public class GameController : MonoBehaviour {
             {
                 if (debugActive)
                 {
-                    Debug.Log("Recording complete!");
+                    Debug.Log("Sunrise complete!");
                     Debug.Log("Elapsed time in seconds " + elapsedTime);
-                    Debug.Log("Manual Recording Active " + manualRecord);
                 }
 
                 // disable
@@ -274,53 +275,53 @@ public class GameController : MonoBehaviour {
         }
     }
 
-    private void PlaybackImage()
-    {
-        if (!simulationMode)
-        {
-            if (isSunriseActive)
-            {
-                if (imagePlayback.isLoaded)
-                    imagePlayback.isLoaded = false;
+    //private void PlaybackImage()
+    //{
+    //    if (!simulationMode)
+    //    {
+    //        if (isSunriseActive)
+    //        {
+    //            if (imagePlayback.isLoaded)
+    //                imagePlayback.isLoaded = false;
 
-                imagePlayback.RenderMaterial(false);
-            }
-            else
-            {
-                if (!imagePlayback.isLoaded)
-                {
-                    imagePlayback.LoadImages(imagesFolder);
-                }
-                else
-                {
-                    imagePlayback.PlayImages(framesPerSecond);
-                }
+    //            imagePlayback.RenderMaterial(false);
+    //        }
+    //        else
+    //        {
+    //            if (!imagePlayback.isLoaded)
+    //            {
+    //                imagePlayback.LoadImages(imagesFolder);
+    //            }
+    //            else
+    //            {
+    //                imagePlayback.PlayImages(framesPerSecond);
+    //            }
 
-                imagePlayback.RenderMaterial(true);
-            }
-        }
-        else
-        {
-            if (manualRecord)
-            {
-                if (imagePlayback.isLoaded)
-                    imagePlayback.isLoaded = false;
+    //            imagePlayback.RenderMaterial(true);
+    //        }
+    //    }
+    //    else
+    //    {
+    //        if (manualRecord)
+    //        {
+    //            if (imagePlayback.isLoaded)
+    //                imagePlayback.isLoaded = false;
 
-                imagePlayback.RenderMaterial(false);
-            }
-            else
-            {
-                if (!imagePlayback.isLoaded)
-                {
-                    imagePlayback.LoadImages(imagesFolder);
-                }
-                else
-                {
-                    imagePlayback.PlayImages(framesPerSecond);
-                }
+    //            imagePlayback.RenderMaterial(false);
+    //        }
+    //        else
+    //        {
+    //            if (!imagePlayback.isLoaded)
+    //            {
+    //                imagePlayback.LoadImages(imagesFolder);
+    //            }
+    //            else
+    //            {
+    //                imagePlayback.PlayImages(framesPerSecond);
+    //            }
 
-                imagePlayback.RenderMaterial(true);
-            }
-        }
-    }
+    //            imagePlayback.RenderMaterial(true);
+    //        }
+    //    }
+    //}
 }
