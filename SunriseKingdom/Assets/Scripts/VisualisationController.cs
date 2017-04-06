@@ -6,13 +6,21 @@ public class VisualisationController : MonoBehaviour {
 
     public Material mat;
     public string uniformArrayName;
-    public Color[] colors;
-    public int numDays;
+    public Color[][] colors;
+    [Range(0, 364)]
+    public int days;
+    [Range(0, 12)]
+    public int shotsPerDay;
 	// Use this for initialization
 	void Start () {
-        for (int i = 0; i < colors.Length; i++)
+        colors = new Color[3][];
+        for(int i = 0; i < colors.Length; i++)
         {
-            colors[i] = new Color(0, 0, 0, 0);
+            colors[i] = new Color[365];
+            for(int j = 0; j < colors[i].Length; j++)
+            {
+                colors[i][j] = new Color(Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1);
+            }
         }
     }
 
@@ -20,8 +28,12 @@ public class VisualisationController : MonoBehaviour {
     void Update () {
         if (mat != null)
         {
-            mat.SetColorArray(uniformArrayName, colors);
-            mat.SetInt("days", numDays);
+            for(int i = 0; i < colors.Length; i++)
+            {
+                mat.SetColorArray(uniformArrayName + (i+1).ToString(), colors[i]);
+            }
+            mat.SetInt("days", days);
+            mat.SetInt("shotsPerDay", shotsPerDay);
         }
     }
 }

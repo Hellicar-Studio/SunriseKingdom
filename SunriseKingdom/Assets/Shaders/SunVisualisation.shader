@@ -2,8 +2,7 @@
 {
 	Properties
 	{
-		_Color1 ("Color1", Color) = (1, 1, 1, 1)
-		_Color2 ("Color2", Color) = (0, 0, 0, 0)
+
 	}
 	SubShader
 	{
@@ -33,10 +32,22 @@
 				float4 vertex : SV_POSITION;
 			};
 
-			uniform float4 _Color1;
-			uniform float4 _Color2;
-			uniform float4 Colors[365];
+			//uniform float4 Colors[3][365];
+			uniform float4 Colors1[365];
+			uniform float4 Colors2[365];
+			uniform float4 Colors3[365];
+			uniform float4 Colors4[365];
+			uniform float4 Colors5[365];
+			//uniform float4 Colors6[365];
+			//uniform float4 Colors7[365];
+			//uniform float4 Colors8[365];
+			//uniform float4 Colors9[365];
+			// uniform float4 Colors10[365];
+			// uniform float4 Colors11[365];
+			// uniform float4 Colors12[365];
+
 			uniform int days;
+			uniform int shotsPerDay;
 
 			v2f vert (appdata v)
 			{
@@ -45,14 +56,50 @@
 				o.uv = v.uv;
 				return o;
 			}
+
+			int getPartition(float pos, float paritionSize) {
+				return pos / paritionSize;
+			}
+
+			float getPercentage(float pos, float partitionSize) {
+					return (pos%partitionSize) / partitionSize;
+			}
+
+			float4 getColorPercentage(float4 col1, float4 col2, int partition, float pos, float partitionSize) {
+				float pe = getPercentage(pos, partitionSize);
+				int pa = getPartition(pos, partitionSize);
+				if (pa == partition)
+					return col1 * pe + col2 * (1.0f - pe);
+				return 0.0f;
+			}
+
+			//float4 getColorForPartition(float4 topColor, float4 bottomColor, float2 pos, float paritionSize, int2 partition) {
+			//	return topColor * getPercentage(pos.y, paritionSize, partition.y, 1) + bottomColor * (1 - getPercentage(pos.y, paritionSize, partition.y, 1));
+			//}
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
 				fixed4 col;
-				float partitionWidth = 1.0 / days;
-				int myPartition = i.uv.x / partitionWidth;
+				float2 partitionSize;
+				partitionSize.x = 1.0 / days;
+				partitionSize.y = 1.0 / shotsPerDay;
+
+				int partitionX = getPartition(i.uv.x, partitionSize.x);
+
 				// sample the texture
-				col = Colors[myPartition] * i.uv.y;//tex2D(_MainTex, i.uv);
+				float p = getPercentage(i.uv.y, partitionSize.y);
+				float4 col1 = Colors1[partitionX];
+				float4 col2 = Colors2[partitionX];
+				float4 col3 = Colors3[partitionX];
+				float4 col4 = Colors4[partitionX];
+				float4 col5 = Colors5[partitionX];
+
+				col = float4(0, 0, 0, 1);
+
+				col += getColorPercentage(col1, col2, 0, i.uv.y, partitionSize.y);
+				col += getColorPercentage(col3, col1, 1, i.uv.y, partitionSize.y);
+				col += getColorPercentage(col4, col3, 2, i.uv.y, partitionSize.y);
+				col += getColorPercentage(col5, col4, 3, i.uv.y, partitionSize.y);
 				return col;
 			}
 			ENDCG
