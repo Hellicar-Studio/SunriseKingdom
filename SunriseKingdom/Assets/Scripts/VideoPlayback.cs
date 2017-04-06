@@ -8,8 +8,8 @@ public class VideoPlayback : MonoBehaviour {
 
     public MediaPlayer[] media;
     public Renderer[] rend;
-    [HideInInspector]
-    public int maxVideos = 4;
+    //[HideInInspector]
+    //public int maxVideos = 4;
     [HideInInspector]
     public float loadAtSeconds = 30f;
     //[HideInInspector]
@@ -148,7 +148,7 @@ public class VideoPlayback : MonoBehaviour {
             // advance to the next video
             // reset loop if we reach the end
             item++;
-            if (item > maxVideos - 1)
+            if (item > VideoRecord.mostRecentRecording.Length-1) //  edited by JB
             {
                 // disable screen capture
                 firstPlayback = false;
@@ -213,7 +213,7 @@ public class VideoPlayback : MonoBehaviour {
         //    itemCorrected = 0;
         //}
 
-        string fileName = _filePath[(maxVideos-1) - _item]; //videoFolder + _item.ToString() + fileExtension;
+        string fileName = _filePath[_item]; //videoFolder + _item.ToString() + fileExtension;
         media[player].OpenVideoFromFile(MediaPlayer.FileLocation.AbsolutePathOrURL, fileName);
         media[player].m_AutoStart = false;
         isLoaded[player] = true;

@@ -49,7 +49,7 @@ public class VideoRecord : MonoBehaviour {
     private float timeRecordingStarted;
     private bool recording;
     public int recordingDuration;
-    //[HideInInspector]
+    public string[] mostRecentRecordingCopy;
     public static string[] mostRecentRecording;
     [HideInInspector]
     public string recordingsRoot = "D:\\SunriseNAS";
@@ -68,9 +68,13 @@ public class VideoRecord : MonoBehaviour {
         allVideoFiles = new ArrayList();
 
         mostRecentRecording = null;
-        mostRecentRecording = new string[12];
 
         getRecordingPath(recordingsRoot);
+    }
+
+    private void Update()
+    {
+        mostRecentRecordingCopy = mostRecentRecording;
     }
 
     /*
@@ -108,8 +112,8 @@ public class VideoRecord : MonoBehaviour {
     // Start a new Recording (on the camera)
     public WWW StartRecording()
     {
-        mostRecentRecording = null;
-        mostRecentRecording = new string[12];
+        //mostRecentRecording = null;
+        //mostRecentRecording = new string[12];
 
         WWW www = new WWW(StartRecordingURL);
         while (!www.isDone) { }
@@ -255,15 +259,29 @@ public class VideoRecord : MonoBehaviour {
             }
         }
 
+        mostRecentRecording = new string[(pathDates.Length > 12 ? 12 : pathDates.Length)];
+
         for(int i = 0; i < pathDates.Length; i++)
         {
-            if(i < mostRecentRecording.Length)
+            if(i < mostRecentRecording.Length && i < pathDates.Length)
             {
                 mostRecentRecording[i] = pathDates[i].path;
             } else
             {
                 break;
             }
+        }
+
+        flipMostRecentRecordingArray();
+    }
+
+    void flipMostRecentRecordingArray()
+    {
+        for(int i = 0; i < mostRecentRecording.Length/2; i++)
+        {
+            string temp = mostRecentRecording[i];
+            mostRecentRecording[i] = mostRecentRecording[mostRecentRecording.Length - 1 - i];
+            mostRecentRecording[mostRecentRecording.Length - 1 - i] = temp;
         }
     }
 

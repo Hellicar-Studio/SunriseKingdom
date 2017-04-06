@@ -32,8 +32,8 @@ public class GameController : MonoBehaviour {
     public float recordingMaxSeconds = 3600f;
     //[Header("Playback")]
     //public PlaybackMode playbackMode = PlaybackMode.video;
-    [Header("Playback - Video")]
-    public int maxVideos = 12;
+    //[Header("Playback - Video")]
+    //public int maxVideos = 12;
     public float loadAtSeconds = 150f;
     //public string fileExtension = ".mkv";
     [Header("Support")]
@@ -59,7 +59,7 @@ public class GameController : MonoBehaviour {
         videoPlayback.debugActive = debugActive;
 
         // setup video playback variables
-        videoPlayback.maxVideos = maxVideos;
+        //videoPlayback.maxVideos = maxVideos;
         videoPlayback.loadAtSeconds = loadAtSeconds;
         //videoPlayback.fileExtension = fileExtension;
         videoPlayback.videoFolder = videoFolder;
