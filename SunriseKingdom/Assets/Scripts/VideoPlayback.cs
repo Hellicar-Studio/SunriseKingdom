@@ -21,7 +21,7 @@ public class VideoPlayback : MonoBehaviour {
     [HideInInspector]
     public bool beginPlayback = false;
     [HideInInspector]
-    public bool firstPlayback = true;
+    public bool firstPlayback = false;
     [HideInInspector]
     public bool debugActive = false;
 
@@ -154,8 +154,6 @@ public class VideoPlayback : MonoBehaviour {
             item++;
             if (item > VideoRecord.mostRecentRecording.Length-1) //  edited by JB
             {
-                // disable screen capture
-                firstPlayback = false;
                 // reset items for looping
                 item = 0;
             }
@@ -247,10 +245,15 @@ public class VideoPlayback : MonoBehaviour {
 
     private void CaptureScreenshot()
     {
-        Application.CaptureScreenshot(imagesFolder + item + ".png");
+        int itemCorrected = item - 1;
+        if (itemCorrected == -1)
+        {
+            itemCorrected = VideoRecord.mostRecentRecording.Length - 1;
+        }
+        Application.CaptureScreenshot(imagesFolder + itemCorrected + ".png");
 
         if (debugActive)
-            Debug.Log("Screenshot " + item + ".png has been saved!");
+            Debug.Log("Screenshot " + itemCorrected + ".png has been saved!");
 
         screenshotTaken = true;
     }
@@ -264,6 +267,15 @@ public class VideoPlayback : MonoBehaviour {
         }
         EmailThread.item = itemCorrected;
         if (!EmailThread.emailSent) EmailThread.emailSent = true;
+
+        // when the last email in the list is sent, disable firstplayback toggle
+        if (itemCorrected == VideoRecord.mostRecentRecording.Length - 1)
+        {
+            firstPlayback = false;
+
+            if (debugActive)
+                Debug.Log("The first playback is complete!");
+        }
     }
 
     private void LoadVideo(int player, int _item, string[] _filePath)

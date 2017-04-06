@@ -15,14 +15,15 @@ public class GameController : MonoBehaviour {
     public ImagePlayback imagePlayback;
     public VideoPlayback videoPlayback;
     public VideoRecord videoRecord;
-    public MediaPlayerCtrl liveStream;
+    //public MediaPlayerCtrl liveStream;
+    public Transform playbackTransform;
     
     [Header("Sunrise Data")]
     public string APIKey = "7f09e7d718a5c1dd8d39f1635ac7f006";
     public string city = "London";
     public string checkSunriseTimeAt = "03:00";
-    [Header("Live Stream")]
-    public string videoURL = "rtsp://88.97.57.25:10001/axis-media/media.amp?videocodec=h264";
+    //[Header("Live Stream")]
+    //public string videoURL = "rtsp://88.97.57.25:10001/axis-media/media.amp?videocodec=h264";
     //public float framesPerSecond = 25f;
     [Header("Data Folders")]
     public string videoFolder = "D:\\SunriseData/Videos/";
@@ -30,7 +31,9 @@ public class GameController : MonoBehaviour {
     [Header("Recorder")]
     public string cameraIP = "192.168.1.201";
     public float recordingMaxSeconds = 3600f;
-    //[Header("Playback")]
+    [Header("Playback")]
+    public Vector3 position;
+    public float scale = 1;
     //public PlaybackMode playbackMode = PlaybackMode.video;
     //[Header("Playback - Video")]
     //public int maxVideos = 12;
@@ -74,10 +77,10 @@ public class GameController : MonoBehaviour {
         videoRecord.maxVideos = (int)Mathf.Max(2, recordingMaxSeconds / 300.0f);
 
         // setup video stream url
-        liveStream.m_strFileName = videoURL;
+        //liveStream.m_strFileName = videoURL;
 
         // sync seconds
-        videoStream.recordingMaxSeconds = recordingMaxSeconds;
+        //videoStream.recordingMaxSeconds = recordingMaxSeconds;
     }
 
 	// Update is called once per frame
@@ -85,7 +88,7 @@ public class GameController : MonoBehaviour {
     {
         // main systems
         SunSystem();
-        VideoStream();
+        //VideoStream();
         RecordVideo();
         PlaybackVideo();
 
@@ -102,10 +105,11 @@ public class GameController : MonoBehaviour {
         //    imagePlayback.RenderMaterial(false);
         //}
 
-        // on escape key up, unload media and quit app
+        // on escape key up, quit app
         if (Input.GetKeyUp(KeyCode.Escape))
         {
-            liveStream.UnLoad();
+            //liveStream.UnLoad();
+            Application.Quit();
         }
 
         if (manualRecord || isSunriseActive)
@@ -167,7 +171,10 @@ public class GameController : MonoBehaviour {
             else
             {
                 if (videoRecord.isRecording)
+                {
+                    videoPlayback.firstPlayback = true;
                     videoRecord.StopRecording();
+                }
             }
         }
         else
@@ -180,62 +187,65 @@ public class GameController : MonoBehaviour {
             else
             {
                 if (videoRecord.isRecording)
+                {
+                    videoPlayback.firstPlayback = true;
                     videoRecord.StopRecording();
+                }
             }
         }
     }
 
-    private void VideoStream()
-    {
-        if (!simulationMode)
-        {
-            if (isSunriseActive)
-            {
-                videoStream.RenderMaterial(true);
+    //private void VideoStream()
+    //{
+    //    if (!simulationMode)
+    //    {
+    //        if (isSunriseActive)
+    //        {
+    //            videoStream.RenderMaterial(true);
 
-                //if (!videoStream.isFolderClear)
-                //{
-                //    videoStream.ClearFolder(videoFolder);
-                //}
-                //else
-                //{
-                //    videoStream.VideoRecord(videoFolder, framesPerSecond);
-                //    videoStream.RenderMaterial(true);
-                //}
-            }
-            else
-            {
-                //if (videoStream.isFolderClear)
-                //    videoStream.isFolderClear = false;
+    //            //if (!videoStream.isFolderClear)
+    //            //{
+    //            //    videoStream.ClearFolder(videoFolder);
+    //            //}
+    //            //else
+    //            //{
+    //            //    videoStream.VideoRecord(videoFolder, framesPerSecond);
+    //            //    videoStream.RenderMaterial(true);
+    //            //}
+    //        }
+    //        else
+    //        {
+    //            //if (videoStream.isFolderClear)
+    //            //    videoStream.isFolderClear = false;
 
-                videoStream.RenderMaterial(false);
-            }
-        }
-        else
-        {
-            if (manualRecord)
-            {
-                videoStream.RenderMaterial(true);
+    //            videoStream.RenderMaterial(false);
+    //        }
+    //    }
+    //    else
+    //    {
+    //        if (manualRecord)
+    //        {
+    //            videoStream.RenderMaterial(true);
 
-                //if (!videoStream.isFolderClear)
-                //{
-                //    videoStream.ClearFolder(videoFolder);
-                //}
-                //else
-                //{
-                //    videoStream.VideoRecord(videoFolder, framesPerSecond);
-                //    videoStream.RenderMaterial(true);
-                //}
-            }
-            else
-            {
-                //if (videoStream.isFolderClear)
-                //    videoStream.isFolderClear = false;
+    //            //if (!videoStream.isFolderClear)
+    //            //{
+    //            //    videoStream.ClearFolder(videoFolder);
+    //            //}
+    //            //else
+    //            //{
+    //            //    videoStream.VideoRecord(videoFolder, framesPerSecond);
+    //            //    videoStream.RenderMaterial(true);
+    //            //}
+    //        }
+    //        else
+    //        {
+    //            //if (videoStream.isFolderClear)
+    //            //    videoStream.isFolderClear = false;
 
-                videoStream.RenderMaterial(false);
-            }
-        }
-    }
+    //            videoStream.RenderMaterial(false);
+    //        }
+    //    }
+    //}
 
     private void PlaybackVideo()
     {
@@ -250,7 +260,6 @@ public class GameController : MonoBehaviour {
             {
                 if (!videoPlayback.beginPlayback)
                 {
-                    videoPlayback.firstPlayback = true;
                     videoPlayback.BeginPlayback();
                 }
                 else
@@ -270,7 +279,6 @@ public class GameController : MonoBehaviour {
             {
                 if (!videoPlayback.beginPlayback)
                 {
-                    videoPlayback.firstPlayback = true;
                     videoPlayback.BeginPlayback();
                 }
                 else
