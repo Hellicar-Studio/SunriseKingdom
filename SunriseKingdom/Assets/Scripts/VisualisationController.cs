@@ -10,14 +10,14 @@ public class VisualisationController : MonoBehaviour {
     public int numDays;
 	// Use this for initialization
 	void Start () {
-        //for(int i = 0; i < colors.Length; i++)
-        //{
-        //    colors[i] = new Color(0, 0, 0, 0);
-        //}
-	}
-	
-	// Update is called once per frame
-	void Update () {
+        for (int i = 0; i < colors.Length; i++)
+        {
+            colors[i] = new Color(0, 0, 0, 0);
+        }
+    }
+
+    // Update is called once per frame
+    void Update () {
         if (mat != null)
         {
             mat.SetColorArray(uniformArrayName, colors);
