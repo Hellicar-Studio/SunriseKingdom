@@ -260,7 +260,7 @@ public class VideoPlayback : MonoBehaviour {
         int itemCorrected = item - 1;
         if (itemCorrected == -1)
         {
-            itemCorrected = maxVideos - 1;
+            itemCorrected = VideoRecord.mostRecentRecording.Length - 1;
         }
         EmailThread.item = itemCorrected;
         if (!EmailThread.emailSent) EmailThread.emailSent = true;
