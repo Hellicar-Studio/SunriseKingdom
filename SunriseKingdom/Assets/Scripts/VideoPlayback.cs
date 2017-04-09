@@ -1,29 +1,29 @@
-﻿//using System.Collections;
-//using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using RenderHeads.Media.AVProVideo;
-//using System.IO;
+using UnityEngine.UI;
 
 public class VideoPlayback : MonoBehaviour {
 
+    public EmailThread emailSender;
     public MediaPlayer[] media;
     public Renderer[] rend;
-    //[HideInInspector]
-    //public int maxVideos = 4;
+
     [HideInInspector]
-    public float loadAtSeconds = 30f;
-    //[HideInInspector]
-    //public string fileExtension = ".mkv";
+    public float videoLoadTime = 150f;
     [HideInInspector]
-    public string videoFolder = "D:\\SunriseData/Images/";
+    public string videoFolder = "D:\\SunriseData/Videos/";
     [HideInInspector]
-    public string imagesFolder = "D:\\SunriseData/Images/";
+    public string imageFolder = "D:\\SunriseData/Images/";
     [HideInInspector]
     public bool beginPlayback = false;
     [HideInInspector]
-    public bool firstPlayback = false;
+    public bool emailActive = false;
     [HideInInspector]
     public bool debugActive = false;
+
+    public Slider playhead;
 
     //controls
     public bool play = false;
@@ -57,7 +57,7 @@ public class VideoPlayback : MonoBehaviour {
 
         if (_dataFolder == null)
         {
-            if (debugActive) Debug.Log("File paths were empty!  Will check again in 60seconds.");
+            if (debugActive) Debug.Log("File paths were empty!  Will check again in 60 sec...");
             filesExist = false;
             extCount++;
 
@@ -75,32 +75,6 @@ public class VideoPlayback : MonoBehaviour {
             if (debugActive) Debug.Log("File paths are ready!");
             filesExist = true;
         }
-
-        //DirectoryInfo di = new DirectoryInfo(_dataFolder);
-        //int fileCount = di.GetFiles("*" + fileExtension).Length;
-
-        //if (fileCount != maxVideos)
-        //{
-        //    filesExist = false;
-        //    extCount++;
-
-        //    if (extCount > 1)
-        //    {
-        //        timeExtension = 60f;
-        //    }
-        //    else
-        //    {
-        //        timeExtension = 0f;
-        //    }
-
-        //    if (debugActive) Debug.Log("Incorrect amount or no videos were found!");
-        //}
-        //else
-        //{
-        //    filesExist = true;
-        //}
-
-        //if (debugActive) Debug.Log("Videos files found " + fileCount + ".");
     }
 
     public void BeginPlayback()
@@ -121,6 +95,10 @@ public class VideoPlayback : MonoBehaviour {
             LoadVideo(0, 0, VideoRecord.mostRecentRecording);
             PlayVideo(0);
 
+            play = true;
+            pause = false;
+            stop = false;
+
             // toggle playback flag
             beginPlayback = true;
         }
@@ -130,7 +108,7 @@ public class VideoPlayback : MonoBehaviour {
             elapsedTime += Time.deltaTime;
             if (elapsedTime >= timeExtension)
             {
-                CheckForVideoFiles(VideoRecord.mostRecentRecording); // Application.streamingAssetsPath);
+                CheckForVideoFiles(VideoRecord.mostRecentRecording);
                 elapsedTime = 0f;
             }
         }
@@ -179,33 +157,37 @@ public class VideoPlayback : MonoBehaviour {
         }
 
         // loads the correct video for the right player
-        if (!media[0].Control.IsFinished() && (int)elapsedTime == loadAtSeconds && !isLoaded[1])
+        if (!media[0].Control.IsFinished() && (int)elapsedTime == videoLoadTime && !isLoaded[1])
         {
             LoadVideo(1, item, VideoRecord.mostRecentRecording);
         }
-        else if (!media[1].Control.IsFinished() && (int)elapsedTime == loadAtSeconds && !isLoaded[0])
+        else if (!media[1].Control.IsFinished() && (int)elapsedTime == videoLoadTime && !isLoaded[0])
         {
             LoadVideo(0, item, VideoRecord.mostRecentRecording);
         }
 
-        // on first playback capture 1 screenshot for each video at a specific time
-        if (firstPlayback && !screenshotTaken && (int)elapsedTime == loadAtSeconds)
+        // if active, a cycles of saving screenshots and emails occur after recording stops
+        if (emailActive)
         {
-            CaptureScreenshot();
-        }
-        else if ((int)elapsedTime != loadAtSeconds)
-        {
-            if (screenshotTaken) screenshotTaken = false;
-        }
+            // on first playback capture 1 screenshot for each video at a specific time
+            if (!screenshotTaken && (int)elapsedTime == videoLoadTime)
+            {
+                CaptureScreenshot();
+            }
+            else if ((int)elapsedTime != videoLoadTime)
+            {
+                if (screenshotTaken) screenshotTaken = false;
+            }
 
-        // on first playback send emails of the screenshots 10 seconds at the capture is taken
-        if (firstPlayback && !EmailThread.emailSent && (int)elapsedTime == loadAtSeconds + 10)
-        {
-            SendEmail();
+            // on first playback send emails of the screenshots 10 seconds at the capture is taken
+            if (!emailSender.emailSent && (int)elapsedTime == videoLoadTime + 10)
+            {
+                SendEmail();
+            }
         }
     }
 
-    public void MediaControls()
+    private void MediaControls()
     {
         int player = (item + 1) % 2;
         // play media
@@ -219,7 +201,7 @@ public class VideoPlayback : MonoBehaviour {
         }
 
         // stop the system and reset
-        if (media[player].Control.IsPlaying() && stop)
+        if (stop)
         {
             // reset system variables
             BeginPlayback();
@@ -241,52 +223,62 @@ public class VideoPlayback : MonoBehaviour {
             stop = false;
             play = false;
         }
+
+        // ui slider playhead controls
+        bool selected = playhead.GetComponent<UIMouseDown>().selected;
+        if (selected)
+        {
+            // seek to playhead location
+            media[player].Control.Seek(playhead.value);
+        }
+        else
+        {
+            // value is media current time in ms
+            playhead.value = media[player].Control.GetCurrentTimeMs();
+        }
+
+        // set max value of slider to media duration in ms
+        playhead.maxValue = media[player].Info.GetDurationMs();
     }
 
-    private void CaptureScreenshot()
+    private int itemAdjust(int _item)
     {
-        int itemCorrected = item - 1;
+        int itemCorrected = _item - 1;
         if (itemCorrected == -1)
         {
             itemCorrected = VideoRecord.mostRecentRecording.Length - 1;
         }
-        Application.CaptureScreenshot(imagesFolder + itemCorrected + ".png");
+        return itemCorrected;
+    }
+
+    private void CaptureScreenshot()
+    {
+        Application.CaptureScreenshot(imageFolder + itemAdjust(item) + ".png");
 
         if (debugActive)
-            Debug.Log("Screenshot " + itemCorrected + ".png has been saved!");
+            Debug.Log("Screenshot " + itemAdjust(item) + ".png has been saved!");
 
         screenshotTaken = true;
     }
 
     private void SendEmail()
     {
-        int itemCorrected = item - 1;
-        if (itemCorrected == -1)
-        {
-            itemCorrected = VideoRecord.mostRecentRecording.Length - 1;
-        }
-        EmailThread.item = itemCorrected;
-        if (!EmailThread.emailSent) EmailThread.emailSent = true;
+        emailSender.item = itemAdjust(item);
+        if (!emailSender.emailSent) emailSender.emailSent = true;
 
-        // when the last email in the list is sent, disable firstplayback toggle
-        if (itemCorrected == VideoRecord.mostRecentRecording.Length - 1)
+        // when the last email in the list is sent, disable toggle
+        if (itemAdjust(item) == VideoRecord.mostRecentRecording.Length - 1)
         {
-            firstPlayback = false;
+            emailActive = false;
 
             if (debugActive)
-                Debug.Log("The first playback is complete!");
+                Debug.Log("The email cycle is complete until next recording.");
         }
     }
 
     private void LoadVideo(int player, int _item, string[] _filePath)
     {
-        //int itemCorrected = _item + 1;
-        //if (itemCorrected > maxVideos-1)
-        //{
-        //    itemCorrected = 0;
-        //}
-
-        string fileName = _filePath[_item]; //videoFolder + _item.ToString() + fileExtension;
+        string fileName = _filePath[_item];
         media[player].OpenVideoFromFile(MediaPlayer.FileLocation.AbsolutePathOrURL, fileName);
         media[player].m_AutoStart = false;
         isLoaded[player] = true;
@@ -294,7 +286,6 @@ public class VideoPlayback : MonoBehaviour {
         if (debugActive)
         {
             Debug.Log("Loading MediaPlayer " + player);
-            //Debug.Log("Loading Video " + itemCorrected);
         }
     }
 

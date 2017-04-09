@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-//using System.Collections;
+using System.Collections;
 using System.Threading;
 using System.Net;
 using System.Net.Mail;
@@ -8,19 +8,29 @@ using System.Security.Cryptography.X509Certificates;
 
 public class EmailThread : MonoBehaviour
 {
-    public static bool emailSent = false;
-    public static int item = 0;
-    public static string imagesFolder;
-
     #region Public data
-    public string fromAddress = "from@email.here";
-    public string toAddress = "to@email.here";
-    public string subject = "Sunrise Kingdom - Screenshot";
-    public string messageBody = "";
-    public string password = "";
-    public string SMTPServer = "smtp.gmail.com";
-    public int SMTPPort = 587;
-    public bool debugActive = false;
+    [HideInInspector]
+    public string imagesFolder;
+    [HideInInspector]
+    public string emailAccount;
+    [HideInInspector]
+    public string emailRecipient;
+    [HideInInspector]
+    public string subject;
+    [HideInInspector]
+    public string messageBody;
+    [HideInInspector]
+    public string emailPassword;
+    [HideInInspector]
+    public string serverSMTP;
+    [HideInInspector]
+    public int portSMTP;
+    [HideInInspector]
+    public int item = 0;
+    [HideInInspector]
+    public bool debugActive;
+    [HideInInspector]
+    public bool emailSent = false;
     #endregion
 
     #region Private data
@@ -71,24 +81,23 @@ public class EmailThread : MonoBehaviour
     {
         MailMessage mail = new MailMessage();
 
-        mail.From = new MailAddress(fromAddress);
-        mail.To.Add(toAddress);
+        mail.From = new MailAddress(emailAccount);
+        mail.To.Add(emailRecipient);
         mail.Subject = subject + " " + item + ".png";
         mail.Body = messageBody;
 
-        string attachmentPath = imagesFolder + item + ".png"; //@"D:\SunriseData\Images\0.png";
-        //string attachmentPath = @"D:\SunriseData\Images\0.png";
+        string attachmentPath = imagesFolder + item + ".png";
         System.Net.Mail.Attachment attachment = new System.Net.Mail.Attachment(attachmentPath);
         mail.Attachments.Add(attachment);
 
-        SmtpClient smtpServer = new SmtpClient(SMTPServer);
-        smtpServer.Port = SMTPPort;
-        smtpServer.Credentials = new System.Net.NetworkCredential(fromAddress, password) as ICredentialsByHost;
-        smtpServer.EnableSsl = true;
+        SmtpClient server = new SmtpClient(serverSMTP);
+        server.Port = portSMTP;
+        server.Credentials = new System.Net.NetworkCredential(emailAccount, emailPassword) as ICredentialsByHost;
+        server.EnableSsl = true;
         ServicePointManager.ServerCertificateValidationCallback =
             delegate (object s, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
             { return true; };
-        smtpServer.Send(mail);
+        server.Send(mail);
 
         if (debugActive)
             Debug.Log("Email "+ item + " has been successfully sent!");

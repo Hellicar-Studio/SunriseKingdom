@@ -1,129 +1,228 @@
-﻿//using System.Collections;
-//using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
-//public enum PlaybackMode
-//{
-//    image,
-//    video
-//}
+public class GameController : MonoBehaviour
+{
 
-public class GameController : MonoBehaviour {
-	
+    public GameObject uiCanvas;
+    public UIController uiSettings;
     public SunriseController sunrise;
     public VideoStream videoStream;
-    public ImagePlayback imagePlayback;
     public VideoPlayback videoPlayback;
     public VideoRecord videoRecord;
-    //public MediaPlayerCtrl liveStream;
+    public EmailThread emailSender;
     public Transform playbackTransform;
-    
-    [Header("Sunrise Data")]
-    public string APIKey = "7f09e7d718a5c1dd8d39f1635ac7f006";
-    public string city = "London";
-    public string checkSunriseTimeAt = "03:00";
-    //[Header("Live Stream")]
-    //public string videoURL = "rtsp://88.97.57.25:10001/axis-media/media.amp?videocodec=h264";
-    //public float framesPerSecond = 25f;
-    [Header("Data Folders")]
-    public string videoFolder = "D:\\SunriseData/Videos/";
-    public string imagesFolder = "D:\\SunriseData/Images/";
-    [Header("Recorder")]
-    public string cameraIP = "192.168.1.201";
-    public float recordingMaxSeconds = 3600f;
-    [Header("Playback")]
-    public Vector3 position;
-    public float scale = 1;
-    //public PlaybackMode playbackMode = PlaybackMode.video;
-    //[Header("Playback - Video")]
-    //public int maxVideos = 12;
-    public float loadAtSeconds = 150f;
-    //public string fileExtension = ".mkv";
     [Header("Support")]
-    public bool debugActive = true;
     public bool simulationMode = false;
     public bool manualRecord = false;
+    public bool runFirstRun = false;
 
     private bool isSunriseActive = false;
+    private bool isUIActive = true;
     private float elapsedTime = 0f;
+    private float fpsTime = 0f;
 
     // Use this for initialization
     void Start () 
     {
+        // enables ui canvas on launch
+        uiCanvas.SetActive(isUIActive);
+
+        // if this is the first time the app is run
+        if (PlayerPrefs.GetInt("isFirstRun") == 0 || runFirstRun)
+        {
+            if (uiSettings._debugActive)
+            Debug.Log("FirstRun sequence is currently running...");
+
+            // resets the ui settings to default
+            uiSettings.DefaultSettings();
+
+            // save the ui settings
+            uiSettings.SaveSettings();
+
+            // switch toggle
+            PlayerPrefs.SetInt("isFirstRun", 1);
+        }
+        else
+        {
+            // load in saved settings
+            uiSettings.LoadSettings();
+        }
+
+        // updates system variables
+        UpdateSystemSettings();
+    }
+
+    void UpdateSystemSettings()
+    {
         // sunrise startup
-        sunrise.APIKey = APIKey;
-        sunrise.city = city;
+        sunrise.apiKey = uiSettings._apiKey.text;
+        sunrise.city = uiSettings._city.text;
         sunrise.GetSunriseTime();
 
         // setup debug info
-        sunrise.debugActive = debugActive;
-        videoRecord.debugActive = debugActive;
-        //imagePlayback.debugActive = debugActive;
-        videoPlayback.debugActive = debugActive;
+        sunrise.debugActive = uiSettings._debugActive.isOn;
+        videoRecord.debugActive = uiSettings._debugActive.isOn;
+        videoPlayback.debugActive = uiSettings._debugActive.isOn;
+        emailSender.debugActive = uiSettings._debugActive.isOn;
 
-        // emailer
-        EmailThread.imagesFolder = imagesFolder;
+        // folder setup
+        videoPlayback.videoFolder = uiSettings._videoFolder.text;
+        videoPlayback.imageFolder = uiSettings._imageFolder.text;
+        emailSender.imagesFolder = uiSettings._imageFolder.text;
 
         // setup video playback variables
-        //videoPlayback.maxVideos = maxVideos;
-        videoPlayback.loadAtSeconds = loadAtSeconds;
-        //videoPlayback.fileExtension = fileExtension;
-        videoPlayback.videoFolder = videoFolder;
-        videoPlayback.imagesFolder = imagesFolder;
+        videoPlayback.videoLoadTime = float.Parse(uiSettings._videoLoadTime.text);
 
         // setup video recorder variables
-        videoRecord.CamIP = cameraIP;
-        videoRecord.recordingsRoot = videoFolder;
-        videoRecord.maxVideos = (int)Mathf.Max(2, recordingMaxSeconds / 300.0f);
+        videoRecord.CamIP = uiSettings._cameraIP.text;
+        videoRecord.recordingsRoot = uiSettings._videoFolder.text;
+        videoRecord.maxVideos = (int)Mathf.Max(2, float.Parse(uiSettings._recordingDuration.text) / 300.0f);
 
-        // setup video stream url
-        //liveStream.m_strFileName = videoURL;
-
-        // sync seconds
-        //videoStream.recordingMaxSeconds = recordingMaxSeconds;
+        // setup email settings
+        emailSender.emailAccount = uiSettings._emailAccount.text;
+        emailSender.emailPassword = uiSettings._emailPassword.text;
+        emailSender.serverSMTP = uiSettings._serverSMTP.text;
+        emailSender.portSMTP = int.Parse(uiSettings._portSMTP.text);
+        emailSender.emailRecipient = uiSettings._emailRecipient.text;
     }
 
-	// Update is called once per frame
-	void Update () 
+    void UpdateUIText()
+    {
+        if (uiSettings._debugActive)
+        {
+            Debug.Log("Updating UI textfields...");
+        }
+
+        // sunrise data
+        uiSettings.apiKey.text = "API Key: " + sunrise.apiKey;
+        uiSettings.city.text = "City: " + sunrise.city;
+        uiSettings.country.text = "Country: " + sunrise.country;
+        uiSettings.latlon.text = "Lat/Lon: " + sunrise.lat + " / " + sunrise.lon;
+        uiSettings.currentDate.text = "Current Date: " + sunrise.GetCurrentDate();
+        uiSettings.currentTime.text = "Current Time: " + sunrise.GetLocalTime();
+
+        // recording settings
+        uiSettings.cameraIP.text = "Camera IP: " + videoRecord.CamIP;
+        uiSettings.recordingDuration.text = "Recording Duration: " + uiSettings._recordingDuration.text;
+
+        // playback settings
+        uiSettings.imageFolder.text = "Image Folder: " + videoPlayback.imageFolder;
+        uiSettings.videoFolder.text = "Video Folder: " + videoPlayback.videoFolder;
+        uiSettings.videoLoadTime.text = "Video Load Time: " + videoPlayback.videoLoadTime.ToString();
+
+        // email sender
+        uiSettings.emailAccount.text = "Account: " + emailSender.emailAccount;
+        uiSettings.emailPassword.text = "Password: " + emailSender.emailPassword;
+        uiSettings.serverSMTP.text = "Server: " + emailSender.serverSMTP;
+        uiSettings.portSMTP.text = "Port: " + emailSender.portSMTP.ToString();
+        uiSettings.emailRecipient.text = "Recipient: " + emailSender.emailRecipient;
+    }
+
+    // Update is called once per frame
+    void Update () 
     {
         // main systems
         SunSystem();
-        //VideoStream();
         RecordVideo();
         PlaybackVideo();
-
-        //if (playbackMode == PlaybackMode.image)
-        //{
-        //    PlaybackImage();
-        //    // disables all video playback renderers
-        //    videoPlayback.RenderMaterial(false);
-        //}
-        //else
-        //{
-        //    PlaybackVideo();
-        //    // disables image playback renderer
-        //    imagePlayback.RenderMaterial(false);
-        //}
 
         // on escape key up, quit app
         if (Input.GetKeyUp(KeyCode.Escape))
         {
-            //liveStream.UnLoad();
             Application.Quit();
         }
 
-        if (manualRecord || isSunriseActive)
+        // toggles ui view
+        if (Input.GetKeyUp(KeyCode.Space))
+        {
+            isUIActive = !isUIActive;
+
+            if (isUIActive)
+            {
+                uiSettings.LoadSettings();
+            }
+            else
+            {
+                uiSettings.SaveSettings();
+            }
+
+            // toggle canvas
+            uiCanvas.SetActive(isUIActive);
+        }
+
+        // when ui is active onscreen
+        if (isUIActive)
+        {
+            // calculates the fps
+            fpsTime += (Time.deltaTime - fpsTime) * 0.1f;
+            float fps = 1.0f / fpsTime;
+            uiSettings.fps.text = "FPS: " + fps.ToString();
+
+            // video playback window position
+            float x = uiSettings._xPosition.value;
+            float y = uiSettings._yPosition.value;
+            playbackTransform.position = new Vector3(x, y, 0f);
+
+            // video playback window scale
+            float scale = uiSettings._scale.value;
+            playbackTransform.localScale = new Vector3(scale, scale, 1f);
+
+            // capture active media player button states
+            bool play = uiSettings._mediaPlay.GetComponent<UIMouseDown>().selected;
+            bool pause = uiSettings._mediaPause.GetComponent<UIMouseDown>().selected;
+            bool stop = uiSettings._mediaStop.GetComponent<UIMouseDown>().selected;
+
+            if (play) videoPlayback.play = true;
+            if (pause) videoPlayback.pause = true;
+            if (stop) videoPlayback.stop = true;
+
+            uiSettings._mediaPlay.isOn = videoPlayback.play;
+            uiSettings._mediaPause.isOn = videoPlayback.pause;
+            uiSettings._mediaStop.isOn = videoPlayback.stop;
+
+            simulationMode = uiSettings._simulation.isOn;
+            manualRecord = uiSettings._manualRecord.isOn;
+
+            bool resetSelected = uiSettings._resetSystem.GetComponent<UIMouseDown>().selected;
+            if (resetSelected)
+            {
+                // resets the ui settings to default
+                uiSettings.DefaultSettings();
+
+                // save the ui settings
+                uiSettings.SaveSettings();
+
+                UpdateSystemSettings();
+            }
+            else
+            {
+                uiSettings._resetSystem.isOn = false;
+            }
+        }
+
+        if (Input.GetKeyUp(KeyCode.Return))
+        {
+            UpdateSystemSettings();
+        }
+
+        // when the sunrise is active or simulated
+        if (isSunriseActive || manualRecord)
         {
             // count up seconds
             elapsedTime += Time.deltaTime;
 
             // if elapsed time is greater than 1hr
-            if (elapsedTime >= recordingMaxSeconds)
+            float duration = float.Parse(uiSettings.recordingDuration.text);
+            if (elapsedTime >= duration)
             {
-                if (debugActive)
+                if (uiSettings._debugActive)
                 {
-                    Debug.Log("Sunrise complete!");
-                    Debug.Log("Elapsed time in seconds " + elapsedTime);
+                    Debug.Log("Sunrise cycle is complete!");
+                    Debug.Log("Total time was " + elapsedTime + " seconds.");
                 }
 
                 // disable
@@ -134,9 +233,10 @@ public class GameController : MonoBehaviour {
         }
 	}
 
+    // sunrise data system
     private void SunSystem()
     {
-        if (sunrise.GetLocalTime() == checkSunriseTimeAt)
+        if (sunrise.GetLocalTime() == uiSettings.sunriseTimeCheck.text)
         {
             sunrise.GetSunriseTime();
         }
@@ -144,7 +244,13 @@ public class GameController : MonoBehaviour {
         {
             // reset switch
             if (sunrise.isUpdateTime)
+            {
+                // updates all of the UI text fields
+                // runs after sunrise data has been pulled
+                UpdateUIText();
+
                 sunrise.isUpdateTime = false;
+            }
         }
 
         sunrise.GetSunriseStatus();
@@ -159,6 +265,7 @@ public class GameController : MonoBehaviour {
         }
     }
 
+    // video recording system
     private void RecordVideo()
     {
         if (!simulationMode)
@@ -172,7 +279,7 @@ public class GameController : MonoBehaviour {
             {
                 if (videoRecord.isRecording)
                 {
-                    videoPlayback.firstPlayback = true;
+                    videoPlayback.emailActive = true;
                     videoRecord.StopRecording();
                 }
             }
@@ -188,65 +295,14 @@ public class GameController : MonoBehaviour {
             {
                 if (videoRecord.isRecording)
                 {
-                    videoPlayback.firstPlayback = true;
+                    videoPlayback.emailActive = true;
                     videoRecord.StopRecording();
                 }
             }
         }
     }
 
-    //private void VideoStream()
-    //{
-    //    if (!simulationMode)
-    //    {
-    //        if (isSunriseActive)
-    //        {
-    //            videoStream.RenderMaterial(true);
-
-    //            //if (!videoStream.isFolderClear)
-    //            //{
-    //            //    videoStream.ClearFolder(videoFolder);
-    //            //}
-    //            //else
-    //            //{
-    //            //    videoStream.VideoRecord(videoFolder, framesPerSecond);
-    //            //    videoStream.RenderMaterial(true);
-    //            //}
-    //        }
-    //        else
-    //        {
-    //            //if (videoStream.isFolderClear)
-    //            //    videoStream.isFolderClear = false;
-
-    //            videoStream.RenderMaterial(false);
-    //        }
-    //    }
-    //    else
-    //    {
-    //        if (manualRecord)
-    //        {
-    //            videoStream.RenderMaterial(true);
-
-    //            //if (!videoStream.isFolderClear)
-    //            //{
-    //            //    videoStream.ClearFolder(videoFolder);
-    //            //}
-    //            //else
-    //            //{
-    //            //    videoStream.VideoRecord(videoFolder, framesPerSecond);
-    //            //    videoStream.RenderMaterial(true);
-    //            //}
-    //        }
-    //        else
-    //        {
-    //            //if (videoStream.isFolderClear)
-    //            //    videoStream.isFolderClear = false;
-
-    //            videoStream.RenderMaterial(false);
-    //        }
-    //    }
-    //}
-
+    // video playback system
     private void PlaybackVideo()
     {
         if (!simulationMode)
@@ -288,54 +344,4 @@ public class GameController : MonoBehaviour {
             }
         }
     }
-
-    //private void PlaybackImage()
-    //{
-    //    if (!simulationMode)
-    //    {
-    //        if (isSunriseActive)
-    //        {
-    //            if (imagePlayback.isLoaded)
-    //                imagePlayback.isLoaded = false;
-
-    //            imagePlayback.RenderMaterial(false);
-    //        }
-    //        else
-    //        {
-    //            if (!imagePlayback.isLoaded)
-    //            {
-    //                imagePlayback.LoadImages(imagesFolder);
-    //            }
-    //            else
-    //            {
-    //                imagePlayback.PlayImages(framesPerSecond);
-    //            }
-
-    //            imagePlayback.RenderMaterial(true);
-    //        }
-    //    }
-    //    else
-    //    {
-    //        if (manualRecord)
-    //        {
-    //            if (imagePlayback.isLoaded)
-    //                imagePlayback.isLoaded = false;
-
-    //            imagePlayback.RenderMaterial(false);
-    //        }
-    //        else
-    //        {
-    //            if (!imagePlayback.isLoaded)
-    //            {
-    //                imagePlayback.LoadImages(imagesFolder);
-    //            }
-    //            else
-    //            {
-    //                imagePlayback.PlayImages(framesPerSecond);
-    //            }
-
-    //            imagePlayback.RenderMaterial(true);
-    //        }
-    //    }
-    //}
 }
