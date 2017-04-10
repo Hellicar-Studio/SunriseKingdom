@@ -8,9 +8,19 @@ using System;
 public class SunriseController : MonoBehaviour {
 
     [HideInInspector] 
-    public string APIKey;
+    public string apiKey;
     [HideInInspector] 
     public string city;
+    [HideInInspector]
+    public string country;
+    [HideInInspector]
+    public string cityid;
+    [HideInInspector]
+    public string lon;
+    [HideInInspector]
+    public string lat;
+    [HideInInspector]
+    public string sunriseTime;
     [HideInInspector] 
     public bool isUpdateTime = false;
     [HideInInspector]
@@ -18,7 +28,6 @@ public class SunriseController : MonoBehaviour {
     [HideInInspector]
     public bool debugActive = false;
 
-//    private float elapsedTime = 0f;
     private int utcTime;
     private string URL1 = "http://api.openweathermap.org/data/2.5/weather?q=";
     private string URL2 = "&appid=";
@@ -28,6 +37,11 @@ public class SunriseController : MonoBehaviour {
     public string GetLocalTime()
     {
         return DateTime.UtcNow.ToLocalTime().ToShortTimeString();
+    }
+
+    public string GetCurrentDate()
+    {
+        return DateTime.UtcNow.Date.ToShortDateString();
     }
 
     public void GetSunriseStatus()
@@ -61,20 +75,24 @@ public class SunriseController : MonoBehaviour {
         if (!isUpdateTime)
         {
             StartCoroutine(GetUpdatedTime());
-            isUpdateTime = true;
+            //isUpdateTime = true;
         }
     }
 
     IEnumerator GetUpdatedTime() 
     {
         // example of full URL "http://api.openweathermap.org/data/2.5/weather?q=Berlin&appid=7f09e7d718a5c1dd8d39f1635ac7f006"
-        using(UnityWebRequest www = UnityWebRequest.Get(URL1 + city + URL2 + APIKey))
+        using(UnityWebRequest www = UnityWebRequest.Get(URL1 + city + URL2 + apiKey))
         {
             yield return www.Send();
 
             if(www.isError)
             {
-                if (debugActive) Debug.Log(www.error);
+                if (debugActive)
+                {
+                    Debug.Log("Sunrise webrequest failed with the following error:");
+                    Debug.Log(www.error);
+                }
             }
             else
             {
@@ -83,23 +101,25 @@ public class SunriseController : MonoBehaviour {
                 // parses text based on http://openweathermap.org/api for JSON
                 JObject j = JObject.Parse(data);
                 utcTime = (int)j.GetValue("sys").SelectToken("sunrise");
-                
+                country = j.GetValue("sys").SelectToken("country").ToString();
+                cityid = j.SelectToken("id").ToString();
+                city = j.SelectToken("name").ToString();
+                lon = j.GetValue("coord").SelectToken("lon").ToString();
+                lat = j.GetValue("coord").SelectToken("lat").ToString();
+                sunriseTime = ConvertTime(utcTime);
+
                 // display results in the console
                 if (debugActive)
                 {
-                    string _country = j.GetValue("sys").SelectToken("country").ToString();
-                    string _cityid = j.SelectToken("id").ToString();
-                    string _city = j.SelectToken("name").ToString();
-                    string _lon = j.GetValue("coord").SelectToken("lon").ToString();
-                    string _lat = j.GetValue("coord").SelectToken("lat").ToString();
-
-                    Debug.Log("Sunrise city id is " + _cityid);
-                    Debug.Log("Sunrise city is " + _city);
-                    Debug.Log("Sunrise country is " + _country);
-                    Debug.Log("Sunrise lon is " + _lon + ", lat is " + _lat);
+                    Debug.Log("Sunrise city id is " + cityid);
+                    Debug.Log("Sunrise city is " + city);
+                    Debug.Log("Sunrise country is " + country);
+                    Debug.Log("Sunrise lon is " + lon + ", lat is " + lat);
                     Debug.Log("Sunrise time is " + ConvertTime(utcTime));
                 }
             }
+
+            isUpdateTime = true;
         }
     }
 }
