@@ -12,3 +12,7 @@ rtsp://root:pass@88.97.57.25/axis-media/media.amp?videocodec=h264 ???
 HTTP MJPEG Video Feed which works with a web browser & VLC (works with external IP address):
 http://192.168.1.180/axis-cgi/mjpg/video.cgi
 http://88.97.57.25/axis-cgi/mjpg/video.cgi
+
+Folder paths on James' Computer:
+D:\SunriseNAS
+C:\Users\Flowers\Documents\CurrentProjects\SunriseKingdom\SunriseKingdom\Assets\StreamingAssets\Images
