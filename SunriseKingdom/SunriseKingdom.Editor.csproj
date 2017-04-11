@@ -158,7 +158,8 @@
     <None Include="Assets\Addons\JsonDotNet\Assemblies\Standalone\Newtonsoft.Json.XML" />
     <None Include="Assets\Addons\JsonDotNet\Assemblies\Windows\Newtonsoft.Json.XML" />
     <None Include="Assets\Addons\JsonDotNet\link.xml" />
-    <None Include="Assets\Shaders\SunVisualisation.shader" />
+    <None Include="Assets\Shaders\SunVisualisationGradient.shader" />
+    <None Include="Assets\Shaders\SunVisualisationSpots.shader" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />
