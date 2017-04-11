@@ -10,7 +10,6 @@ public class GameController : MonoBehaviour
     public GameObject uiCanvas;
     public UIController uiSettings;
     public SunriseController sunrise;
-    public VideoStream videoStream;
     public VideoPlayback videoPlayback;
     public VideoRecord videoRecord;
     public EmailThread emailSender;
