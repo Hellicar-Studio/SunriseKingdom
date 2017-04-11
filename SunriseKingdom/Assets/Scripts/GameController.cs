@@ -60,7 +60,12 @@ public class GameController : MonoBehaviour
         // sunrise startup
         sunrise.apiKey = uiSettings._apiKey.text;
         sunrise.city = uiSettings._city.text;
-        sunrise.minuteOffset = double.Parse(uiSettings._minuteOffset.text);
+        double result;
+        bool parsed = double.TryParse(uiSettings._minuteOffset.text, out result);
+        if (parsed)
+            sunrise.minuteOffset = result;
+        else
+            sunrise.minuteOffset = -30;
         sunrise.GetSunriseTime();
 
         // setup debug info
