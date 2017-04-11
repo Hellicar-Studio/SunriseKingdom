@@ -60,6 +60,7 @@ public class GameController : MonoBehaviour
         // sunrise startup
         sunrise.apiKey = uiSettings._apiKey.text;
         sunrise.city = uiSettings._city.text;
+        sunrise.minuteOffset = double.Parse(uiSettings._minuteOffset.text);
         sunrise.GetSunriseTime();
 
         // setup debug info
@@ -96,13 +97,18 @@ public class GameController : MonoBehaviour
             Debug.Log("Updating UI textfields...");
         }
 
+        // system data
+        uiSettings.currentDate.text = "Current Date: " + sunrise.GetCurrentDate();
+        uiSettings.currentTime.text = "Current Time: " + sunrise.GetLocalTime();
+
         // sunrise data
         uiSettings.apiKey.text = "API Key: " + sunrise.apiKey;
         uiSettings.city.text = "City: " + sunrise.city;
         uiSettings.country.text = "Country: " + sunrise.country;
         uiSettings.latlon.text = "Lat/Lon: " + sunrise.lat + " / " + sunrise.lon;
-        uiSettings.currentDate.text = "Current Date: " + sunrise.GetCurrentDate();
-        uiSettings.currentTime.text = "Current Time: " + sunrise.GetLocalTime();
+        uiSettings.minuteOffset.text = "Minute Offset: " + sunrise.minuteOffset;
+        uiSettings.sunriseTimeCur.text = "Sunrise Time Current: " + sunrise.sunriseTime;
+        uiSettings.sunriseTimeCheck.text = "Sunrise Time Check: " + uiSettings._sunriseTimeCheck.text;
 
         // recording settings
         uiSettings.cameraIP.text = "Camera IP: " + videoRecord.CamIP;
@@ -203,7 +209,7 @@ public class GameController : MonoBehaviour
             }
         }
 
-        if (Input.GetKeyUp(KeyCode.Return))
+        if (Input.GetKeyUp(KeyCode.Return) || Input.GetKeyUp(KeyCode.KeypadEnter))
         {
             UpdateSystemSettings();
         }

@@ -21,6 +21,8 @@ public class SunriseController : MonoBehaviour {
     public string lat;
     [HideInInspector]
     public string sunriseTime;
+    [HideInInspector]
+    public double minuteOffset;
     [HideInInspector] 
     public bool isUpdateTime = false;
     [HideInInspector]
@@ -61,10 +63,11 @@ public class SunriseController : MonoBehaviour {
     }
 
     // gets sunrise time and converts UNIX/UTC to local time && short time (removes the date)
+    // adds a specified minute offset at the end
     private string ConvertTime(int _time)
     {
         string t;
-        t = string.Format("{0:d/M/yyyy HH:mm:ss}", new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(_time).ToLocalTime().ToShortTimeString());
+        t = string.Format("{0:d/M/yyyy HH:mm:ss}", new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(_time).ToLocalTime().AddMinutes(minuteOffset).ToShortTimeString());
 
         return t;
     }

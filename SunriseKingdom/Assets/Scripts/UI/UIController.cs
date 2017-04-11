@@ -19,6 +19,7 @@ public class UIController : MonoBehaviour {
     public Text latlon;
     public Text currentDate;
     public Text currentTime;
+    public Text minuteOffset;
     public Text cameraIP;
     public Text recordingDuration;
     public Text imageFolder;
@@ -35,6 +36,7 @@ public class UIController : MonoBehaviour {
     public InputField _apiKey;
     public InputField _city;
     public InputField _sunriseTimeCheck;
+    public InputField _minuteOffset;
     public InputField _imageFolder;
     public InputField _videoFolder;
     public InputField _videoLoadTime;
@@ -76,6 +78,7 @@ public class UIController : MonoBehaviour {
         _apiKey.text = "7f09e7d718a5c1dd8d39f1635ac7f006";
         _city.text = "London";
         _sunriseTimeCheck.text = "03:00";
+        _minuteOffset.text = "0";
 
         // player settings
         _imageFolder.text = "D:\\SunriseData/Images/";
@@ -116,6 +119,7 @@ public class UIController : MonoBehaviour {
         _apiKey.text = PlayerPrefs.GetString("apiKey");
         _city.text = PlayerPrefs.GetString("city");
         _sunriseTimeCheck.text = PlayerPrefs.GetString("sunriseTimeCheck");
+        _minuteOffset.text = PlayerPrefs.GetString("minuteOffset");
 
         // player settings
         _imageFolder.text = PlayerPrefs.GetString("imageFolder");
@@ -154,6 +158,7 @@ public class UIController : MonoBehaviour {
         PlayerPrefs.SetString("apiKey", _apiKey.text);
         PlayerPrefs.SetString("city", _city.text);
         PlayerPrefs.SetString("sunriseTimeCheck", _sunriseTimeCheck.text);
+        PlayerPrefs.SetString("minuteOffset", _minuteOffset.text);
 
         // player settings
         PlayerPrefs.SetString("imageFolder", _imageFolder.text);
