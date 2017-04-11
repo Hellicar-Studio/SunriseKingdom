@@ -31,6 +31,8 @@ public class UIController : MonoBehaviour {
     public Text portSMTP;
     public Text emailRecipient;
     public Text fps;
+    public Text recordingStartTime;
+    public Text recordingStopTime;
 
     [Header("Input Fields")]
     public InputField _apiKey;
