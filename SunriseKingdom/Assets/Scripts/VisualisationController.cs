@@ -13,13 +13,26 @@ public class VisualisationController : MonoBehaviour {
     public int shotsPerDay;
 	// Use this for initialization
 	void Start () {
-        colors = new Color[3][];
+        colors = new Color[5][];
         for(int i = 0; i < colors.Length; i++)
         {
             colors[i] = new Color[365];
-            for(int j = 0; j < colors[i].Length; j++)
+            float bonus = -0.5f + (float)i *0.3f;
+            //if (i == 0)
+            //    bonus = -0.2f;
+            //else
+            //    bonus = 0.2f;
+            //
+            float RMin = 0.7f + bonus;
+            float RMax = 0.9f + bonus;
+            float GMin = 0.32f + bonus;
+            float GMax = 0.6f + bonus;
+            float BMin = 0.0f + bonus;
+            float BMax = 0.39f + bonus;
+
+            for (int j = 0; j < colors[i].Length; j++)
             {
-                colors[i][j] = new Color(Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1);
+                colors[i][j] = new Color(Random.Range(RMin, RMax), Random.Range(GMin, GMax), Random.Range(BMin, BMax), 1);
             }
         }
     }
@@ -33,7 +46,7 @@ public class VisualisationController : MonoBehaviour {
                 mat.SetColorArray(uniformArrayName + (i+1).ToString(), colors[i]);
             }
             mat.SetInt("days", days);
-            mat.SetInt("shotsPerDay", shotsPerDay);
+            mat.SetInt("shotsPerDay", colors.Length-1);
         }
     }
 }

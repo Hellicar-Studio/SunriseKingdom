@@ -69,17 +69,27 @@
 				float pe = getPercentage(pos, partitionSize);
 				int pa = getPartition(pos, partitionSize);
 				if (pa == partition)
-					return col1 * pe + col2 * (1.0f - pe);
+					return col2 * pe + col1 * (1.0f - pe);
 				return 0.0f;
 			}
 
-			//float4 getColorForPartition(float4 topColor, float4 bottomColor, float2 pos, float paritionSize, int2 partition) {
-			//	return topColor * getPercentage(pos.y, paritionSize, partition.y, 1) + bottomColor * (1 - getPercentage(pos.y, paritionSize, partition.y, 1));
-			//}
+			float4 getColorPercentage(float4 col1, float4 col2, float pos, float partitionSize) {
+				float pe = getPercentage(pos, partitionSize);
+				int pa = getPartition(pos, partitionSize);
+				return col2 * pe + col1 * (1.0f - pe);
+			}
+
+			float4 getFinalColor(float4 col1, float4 col2, float4 nextCol1, float4 nextCol2, int partition, float2 pos, float2 partitionSize) {
+				float4 col = float4(0, 0, 0, 1);
+				float4 nextCol = float4(0, 0, 0, 1);
+				col += getColorPercentage(col1, col2, partition, pos.y, partitionSize.y);
+				nextCol += getColorPercentage(nextCol1, nextCol2, partition, pos.y, partitionSize.y);
+				return getColorPercentage(col, nextCol, pos.x, partitionSize.x);
+			}
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
-				fixed4 col;
+				float4 col = float4(0, 0, 0, 1);
 				float2 partitionSize;
 				partitionSize.x = 1.0 / days;
 				partitionSize.y = 1.0 / shotsPerDay;
@@ -94,12 +104,22 @@
 				float4 col4 = Colors4[partitionX];
 				float4 col5 = Colors5[partitionX];
 
-				col = float4(0, 0, 0, 1);
+				float4 nextCol1 = Colors1[partitionX + 1];
+				float4 nextCol2 = Colors2[partitionX + 1];
+				float4 nextCol3= Colors3[partitionX + 1];
+				float4 nextCol4 = Colors4[partitionX + 1];
+				float4 nextCol5 = Colors5[partitionX + 1];
 
-				col += getColorPercentage(col1, col2, 0, i.uv.y, partitionSize.y);
-				col += getColorPercentage(col3, col1, 1, i.uv.y, partitionSize.y);
-				col += getColorPercentage(col4, col3, 2, i.uv.y, partitionSize.y);
-				col += getColorPercentage(col5, col4, 3, i.uv.y, partitionSize.y);
+				col += getFinalColor(col1, col2, nextCol1, nextCol2, 0, i.uv.xy, partitionSize);
+				col += getFinalColor(col2, col3, nextCol2, nextCol3, 1, i.uv.xy, partitionSize);
+				col += getFinalColor(col3, col4, nextCol3, nextCol4, 2, i.uv.xy, partitionSize);
+				col += getFinalColor(col4, col5, nextCol4, nextCol5, 3, i.uv.xy, partitionSize);
+
+				//col += getColorPercentage(col1, col2, 0, i.uv.y, partitionSize.y);
+				//col += getColorPercentage(col2, col3, 1, i.uv.y, partitionSize.y);
+				//col += getColorPercentage(col3, col4, 2, i.uv.y, partitionSize.y);
+				//col += getColorPercentage(col4, col5, 3, i.uv.y, partitionSize.y);
+
 				return col;
 			}
 			ENDCG
