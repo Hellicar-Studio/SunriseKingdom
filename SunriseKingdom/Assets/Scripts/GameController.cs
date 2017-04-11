@@ -278,12 +278,16 @@ public class GameController : MonoBehaviour
             if (isSunriseActive)
             {
                 if (!videoRecord.isRecording)
+                {
+                    uiSettings.recordingStartTime.text = "Recording Start: " + sunrise.GetLocalTime();
                     videoRecord.StartRecording();
+                }
             }
             else
             {
                 if (videoRecord.isRecording)
                 {
+                    uiSettings.recordingStopTime.text = "Recording Stop: " + sunrise.GetLocalTime();
                     videoPlayback.emailActive = true;
                     videoRecord.StopRecording();
                 }
