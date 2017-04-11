@@ -1,4 +1,4 @@
-﻿Shader "Custom/SunVisualisation"
+﻿Shader "Custom/SunVisualisationGradient"
 {
 	Properties
 	{

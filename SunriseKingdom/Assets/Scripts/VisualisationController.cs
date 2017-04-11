@@ -17,7 +17,7 @@ public class VisualisationController : MonoBehaviour {
         for(int i = 0; i < colors.Length; i++)
         {
             colors[i] = new Color[365];
-            float bonus = -0.5f + (float)i *0.3f;
+            float bonus = 0.1f;//(float)i *0.3f;
             //if (i == 0)
             //    bonus = -0.2f;
             //else
