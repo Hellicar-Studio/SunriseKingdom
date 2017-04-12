@@ -15,7 +15,6 @@ public class GameController : MonoBehaviour
     public EmailThread emailSender;
     public Transform playbackTransform;
     [Header("Support")]
-    public bool simulationMode = false;
     public bool manualRecord = false;
     public bool runFirstRun = false;
 
@@ -207,9 +206,18 @@ public class GameController : MonoBehaviour
             uiSettings._mediaPause.isOn = videoPlayback.pause;
             uiSettings._mediaStop.isOn = videoPlayback.stop;
 
-            simulationMode = uiSettings._simulation.isOn;
-            manualRecord = uiSettings._manualRecord.isOn;
+            // handles the manual record button
+            bool mRecord = uiSettings._manualRecord.GetComponent<UIMouseDown>().selected;
+            if (mRecord)
+            {
+                manualRecord = true;
+            }
+            else
+            {
+                uiSettings._manualRecord.isOn = manualRecord;
+            }
 
+            // resets the settings to default
             bool resetSelected = uiSettings._resetSystem.GetComponent<UIMouseDown>().selected;
             if (resetSelected)
             {
@@ -233,14 +241,14 @@ public class GameController : MonoBehaviour
         }
 
         // when the sunrise is active or simulated
-        if (isSunriseActive || manualRecord)
+        if (isSunriseActive)
         {
             // count up seconds
             elapsedTime += Time.deltaTime;
 
             // if elapsed time is greater than 1hr
             float duration;
-            bool parsed = float.TryParse(uiSettings.recordingDuration.text, out duration);
+            bool parsed = float.TryParse(uiSettings._recordingDuration.text, out duration);
             if (!parsed)
                 duration = 3600;
             if (elapsedTime >= duration)
@@ -262,7 +270,7 @@ public class GameController : MonoBehaviour
     // sunrise data system
     private void SunSystem()
     {
-        if (sunrise.GetLocalTime() == uiSettings.sunriseTimeCheck.text)
+        if (sunrise.GetLocalTime() == uiSettings._sunriseTimeCheck.text)
         {
             sunrise.GetSunriseTime();
         }
@@ -281,53 +289,34 @@ public class GameController : MonoBehaviour
 
         sunrise.GetSunriseStatus();
 
-        if (!simulationMode)
+        if (manualRecord)
         {
-            isSunriseActive = sunrise.isActive;
+            isSunriseActive = manualRecord;
         }
         else
         {
-            isSunriseActive = manualRecord;
+            isSunriseActive = sunrise.isActive;
         }
     }
 
     // video recording system
     private void RecordVideo()
     {
-        if (!simulationMode)
+        if (isSunriseActive)
         {
-            if (isSunriseActive)
+            if (!videoRecord.isRecording)
             {
-                if (!videoRecord.isRecording)
-                {
-                    uiSettings.recordingStartTime.text = "Recording Start: " + sunrise.GetLocalTime();
-                    videoRecord.StartRecording();
-                }
-            }
-            else
-            {
-                if (videoRecord.isRecording)
-                {
-                    uiSettings.recordingStopTime.text = "Recording Stop: " + sunrise.GetLocalTime();
-                    videoPlayback.emailActive = true;
-                    videoRecord.StopRecording();
-                }
+                uiSettings.recordingStartTime.text = "Recording Start: " + sunrise.GetLocalTime();
+                videoRecord.StartRecording();
             }
         }
         else
         {
-            if (manualRecord)
+            if (videoRecord.isRecording)
             {
-                if (!videoRecord.isRecording)
-                    videoRecord.StartRecording();
-            }
-            else
-            {
-                if (videoRecord.isRecording)
-                {
-                    videoPlayback.emailActive = true;
-                    videoRecord.StopRecording();
-                }
+                uiSettings.recordingStopTime.text = "Recording Stop: " + sunrise.GetLocalTime();
+                videoPlayback.emailActive = true;
+                videoRecord.StopRecording();
             }
         }
     }
@@ -335,42 +324,20 @@ public class GameController : MonoBehaviour
     // video playback system
     private void PlaybackVideo()
     {
-        if (!simulationMode)
+        if (isSunriseActive)
         {
-            if (isSunriseActive)
-            {
-                if (videoPlayback.beginPlayback)
-                    videoPlayback.beginPlayback = false;
-            }
-            else
-            {
-                if (!videoPlayback.beginPlayback)
-                {
-                    videoPlayback.BeginPlayback();
-                }
-                else
-                {
-                    videoPlayback.UpdatePlayer();
-                }
-            }
+            if (videoPlayback.beginPlayback)
+                videoPlayback.beginPlayback = false;
         }
         else
         {
-            if (manualRecord)
+            if (!videoPlayback.beginPlayback)
             {
-                if (videoPlayback.beginPlayback)
-                    videoPlayback.beginPlayback = false;
+                videoPlayback.BeginPlayback();
             }
             else
             {
-                if (!videoPlayback.beginPlayback)
-                {
-                    videoPlayback.BeginPlayback();
-                }
-                else
-                {
-                    videoPlayback.UpdatePlayer();
-                }
+                videoPlayback.UpdatePlayer();
             }
         }
     }
