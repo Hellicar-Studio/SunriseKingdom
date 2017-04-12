@@ -16,3 +16,7 @@ http://88.97.57.25/axis-cgi/mjpg/video.cgi
 Folder paths on James' Computer:
 D:\SunriseNAS
 C:\Users\Flowers\Documents\CurrentProjects\SunriseKingdom\SunriseKingdom\Assets\StreamingAssets\Images
+
+Sunrise Data API:
+Setup account at: https://openweathermap.org/
+API info (see JSON):  https://openweathermap.org/api
