@@ -114,10 +114,6 @@ public class GameController : MonoBehaviour
             Debug.Log("Updating UI textfields...");
         }
 
-        // system data
-        uiSettings.currentDate.text = "Current Date: " + sunrise.GetCurrentDate();
-        uiSettings.currentTime.text = "Current Time: " + sunrise.GetLocalTime();
-
         // sunrise data
         uiSettings.apiKey.text = "API Key: " + sunrise.apiKey;
         uiSettings.city.text = "City: " + sunrise.city;
@@ -144,14 +140,86 @@ public class GameController : MonoBehaviour
         uiSettings.emailRecipient.text = "Recipient: " + emailSender.emailRecipient;
     }
 
+    void UpdateUI()
+    {
+        // system data
+        uiSettings.currentDate.text = "Current Date: " + sunrise.GetCurrentDate();
+        uiSettings.currentTime.text = "Current Time: " + sunrise.GetLocalTime();
+
+        // calculates the fps
+        fpsTime += (Time.deltaTime - fpsTime) * 0.1f;
+        float fps = 1.0f / fpsTime;
+        uiSettings.fps.text = "FPS: " + fps.ToString();
+
+        // video playback window position
+        float x = uiSettings._xPosition.value;
+        float y = uiSettings._yPosition.value;
+        playbackTransform.position = new Vector3(x, y, 0f);
+
+        // video playback window scale
+        float scale = uiSettings._scale.value;
+        playbackTransform.localScale = new Vector3(scale, scale, 1f);
+
+        // capture active media player button states
+        bool play = uiSettings._mediaPlay.GetComponent<UIMouseDown>().selected;
+        bool pause = uiSettings._mediaPause.GetComponent<UIMouseDown>().selected;
+        bool stop = uiSettings._mediaStop.GetComponent<UIMouseDown>().selected;
+
+        if (play) videoPlayback.play = true;
+        if (pause) videoPlayback.pause = true;
+        if (stop) videoPlayback.stop = true;
+
+        uiSettings._mediaPlay.isOn = videoPlayback.play;
+        uiSettings._mediaPause.isOn = videoPlayback.pause;
+        uiSettings._mediaStop.isOn = videoPlayback.stop;
+
+        // handles the manual record button
+        bool mRecord = uiSettings._manualRecord.GetComponent<UIMouseDown>().selected;
+        if (mRecord)
+        {
+            manualRecord = true;
+        }
+        else
+        {
+            uiSettings._manualRecord.isOn = manualRecord;
+        }
+
+        // resets the settings to default
+        bool resetSelected = uiSettings._resetSystem.GetComponent<UIMouseDown>().selected;
+        if (resetSelected)
+        {
+            // resets the ui settings to default
+            uiSettings.DefaultSettings();
+
+            // save the ui settings
+            uiSettings.SaveSettings();
+
+            UpdateSystemSettings();
+        }
+        else
+        {
+            uiSettings._resetSystem.isOn = false;
+        }
+    }
+
     // Update is called once per frame
     void Update () 
     {
         // main systems
+        KeyCommands();
         SunSystem();
         RecordVideo();
         PlaybackVideo();
 
+        // when ui is active onscreen
+        if (isUIActive)
+        {
+            UpdateUI();
+        }
+    }
+
+    private void KeyCommands()
+    {
         // on escape key up, quit app
         if (Input.GetKeyUp(KeyCode.Escape))
         {
@@ -176,68 +244,44 @@ public class GameController : MonoBehaviour
             uiCanvas.SetActive(isUIActive);
         }
 
-        // when ui is active onscreen
-        if (isUIActive)
-        {
-            // calculates the fps
-            fpsTime += (Time.deltaTime - fpsTime) * 0.1f;
-            float fps = 1.0f / fpsTime;
-            uiSettings.fps.text = "FPS: " + fps.ToString();
-
-            // video playback window position
-            float x = uiSettings._xPosition.value;
-            float y = uiSettings._yPosition.value;
-            playbackTransform.position = new Vector3(x, y, 0f);
-
-            // video playback window scale
-            float scale = uiSettings._scale.value;
-            playbackTransform.localScale = new Vector3(scale, scale, 1f);
-
-            // capture active media player button states
-            bool play = uiSettings._mediaPlay.GetComponent<UIMouseDown>().selected;
-            bool pause = uiSettings._mediaPause.GetComponent<UIMouseDown>().selected;
-            bool stop = uiSettings._mediaStop.GetComponent<UIMouseDown>().selected;
-
-            if (play) videoPlayback.play = true;
-            if (pause) videoPlayback.pause = true;
-            if (stop) videoPlayback.stop = true;
-
-            uiSettings._mediaPlay.isOn = videoPlayback.play;
-            uiSettings._mediaPause.isOn = videoPlayback.pause;
-            uiSettings._mediaStop.isOn = videoPlayback.stop;
-
-            // handles the manual record button
-            bool mRecord = uiSettings._manualRecord.GetComponent<UIMouseDown>().selected;
-            if (mRecord)
-            {
-                manualRecord = true;
-            }
-            else
-            {
-                uiSettings._manualRecord.isOn = manualRecord;
-            }
-
-            // resets the settings to default
-            bool resetSelected = uiSettings._resetSystem.GetComponent<UIMouseDown>().selected;
-            if (resetSelected)
-            {
-                // resets the ui settings to default
-                uiSettings.DefaultSettings();
-
-                // save the ui settings
-                uiSettings.SaveSettings();
-
-                UpdateSystemSettings();
-            }
-            else
-            {
-                uiSettings._resetSystem.isOn = false;
-            }
-        }
-
         if (Input.GetKeyUp(KeyCode.Return) || Input.GetKeyUp(KeyCode.KeypadEnter))
         {
             UpdateSystemSettings();
+        }
+    }
+
+    // sunrise data system
+    private void SunSystem()
+    {
+        // check for latest sunrise at the specified time
+        if (sunrise.GetLocalTime() == uiSettings._sunriseTimeCheck.text)
+        {
+            sunrise.GetSunriseTime();
+        }
+        else
+        {
+            // reset switch
+            if (sunrise.isUpdateTime)
+            {
+                // updates all of the UI text fields
+                // runs after sunrise data has been pulled
+                UpdateUIText();
+
+                sunrise.isUpdateTime = false;
+            }
+        }
+
+        // gets sunrise status
+        sunrise.GetSunriseStatus();
+
+        // if manual record is toggled, simulate sunrise
+        if (manualRecord)
+        {
+            isSunriseActive = manualRecord;
+        }
+        else
+        {
+            isSunriseActive = sunrise.isActive;
         }
 
         // when the sunrise is active or simulated
@@ -264,38 +308,6 @@ public class GameController : MonoBehaviour
                 manualRecord = false;
                 sunrise.isActive = false;
             }
-        }
-	}
-
-    // sunrise data system
-    private void SunSystem()
-    {
-        if (sunrise.GetLocalTime() == uiSettings._sunriseTimeCheck.text)
-        {
-            sunrise.GetSunriseTime();
-        }
-        else
-        {
-            // reset switch
-            if (sunrise.isUpdateTime)
-            {
-                // updates all of the UI text fields
-                // runs after sunrise data has been pulled
-                UpdateUIText();
-
-                sunrise.isUpdateTime = false;
-            }
-        }
-
-        sunrise.GetSunriseStatus();
-
-        if (manualRecord)
-        {
-            isSunriseActive = manualRecord;
-        }
-        else
-        {
-            isSunriseActive = sunrise.isActive;
         }
     }
 
