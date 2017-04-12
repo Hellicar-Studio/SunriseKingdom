@@ -52,7 +52,6 @@ public class UIController : MonoBehaviour {
 
     [Header("Toggles")]
     public Toggle _debugActive;
-    public Toggle _simulation;
     public Toggle _manualRecord;
     public Toggle _resetSystem;
     public Toggle _mediaPlay;
@@ -80,7 +79,7 @@ public class UIController : MonoBehaviour {
         _apiKey.text = "7f09e7d718a5c1dd8d39f1635ac7f006";
         _city.text = "London";
         _sunriseTimeCheck.text = "03:00";
-        _minuteOffset.text = "0";
+        _minuteOffset.text = "-30";
 
         // player settings
         _imageFolder.text = "D:\\SunriseData/Images/";
@@ -99,11 +98,10 @@ public class UIController : MonoBehaviour {
         _emailRecipient.text = "jason@glitchbeam.com";
 
         // toggle settings
-        _debugActive.isOn = true;
-        _simulation.isOn = false;
+        _debugActive.isOn = false;
         _manualRecord.isOn = false;
         _resetSystem.isOn = false;
-        _mediaPlay.isOn = false;
+        _mediaPlay.isOn = true;
         _mediaPause.isOn = false;
         _mediaStop.isOn = false;
 
@@ -138,15 +136,6 @@ public class UIController : MonoBehaviour {
         _serverSMTP.text = PlayerPrefs.GetString("smtpServer");
         _portSMTP.text = PlayerPrefs.GetString("smtpPort");
         _emailRecipient.text = PlayerPrefs.GetString("emailRecipient");
-
-        // toggle settings
-        _debugActive.isOn = bool.Parse(PlayerPrefs.GetString("debugActive"));
-        _simulation.isOn = bool.Parse(PlayerPrefs.GetString("simulation"));
-        _manualRecord.isOn = bool.Parse(PlayerPrefs.GetString("manualRecord"));
-        _resetSystem.isOn = bool.Parse(PlayerPrefs.GetString("resetSystem"));
-        _mediaPlay.isOn = bool.Parse(PlayerPrefs.GetString("mediaPlay"));
-        _mediaPause.isOn = bool.Parse(PlayerPrefs.GetString("mediaPause"));
-        _mediaStop.isOn = bool.Parse(PlayerPrefs.GetString("mediaStop"));
     }
 
     public void SaveSettings()
@@ -177,15 +166,6 @@ public class UIController : MonoBehaviour {
         PlayerPrefs.SetString("smtpServer", _serverSMTP.text);
         PlayerPrefs.SetString("smtpPort", _portSMTP.text);
         PlayerPrefs.SetString("emailRecipient", _emailRecipient.text);
-
-        // toggles
-        PlayerPrefs.SetString("debugActive", boolToString(_debugActive.isOn));
-        PlayerPrefs.SetString("simulation", boolToString(_simulation.isOn));
-        PlayerPrefs.SetString("manualRecord", boolToString(_manualRecord.isOn));
-        PlayerPrefs.SetString("resetSystem", boolToString(_resetSystem.isOn));
-        PlayerPrefs.SetString("mediaPlay", boolToString(_mediaPlay.isOn));
-        PlayerPrefs.SetString("mediaPause", boolToString(_mediaPause.isOn));
-        PlayerPrefs.SetString("mediaStop", boolToString(_mediaStop.isOn));
 
         // commits to disk
         PlayerPrefs.Save();
