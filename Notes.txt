@@ -20,3 +20,23 @@ C:\Users\Flowers\Documents\CurrentProjects\SunriseKingdom\SunriseKingdom\Assets\
 Sunrise Data API:
 Setup account at: https://openweathermap.org/
 API info (see JSON):  https://openweathermap.org/api
+
+To setup a new NAS you need to do the following:
+
+Make a new folder and share it via the advanced share settings. Give it a tame.
+
+In Windows Firewall enable:
+
+File and Printer Sharing (SMB-In) Domain
+File and Printer Sharing (NB-Session-In) Domain
+
+For the shared folder right click and go to properties.
+
+Under security make sure everything is ticked for "Authenticated Users"
+Under Sharing click Advanced Sharing Then Permissions Add Authenticated Users as a Group and give them all permissions.
+
+Make sure you click apply on everything.
+
+Then log in to the camera go to Setup > System Options > Storage, disconnect from the current NAS then connect to your new NAS.
+
+Add the IP address of your computer, the name of the shared folder, the username and password for the COMPUTER and click Connect.
