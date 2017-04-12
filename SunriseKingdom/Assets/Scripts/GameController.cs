@@ -80,18 +80,31 @@ public class GameController : MonoBehaviour
         emailSender.imagesFolder = uiSettings._imageFolder.text;
 
         // setup video playback variables
-        videoPlayback.videoLoadTime = float.Parse(uiSettings._videoLoadTime.text);
+        float videoLoadTime;
+        float.TryParse(uiSettings._videoLoadTime.text, out videoLoadTime);
+        if (parsed)
+            videoPlayback.videoLoadTime = videoLoadTime;
+        else
+            videoPlayback.videoLoadTime = 150; // default value
 
         // setup video recorder variables
         videoRecord.CamIP = uiSettings._cameraIP.text;
         videoRecord.recordingsRoot = uiSettings._videoFolder.text;
-        videoRecord.maxVideos = (int)Mathf.Max(2, float.Parse(uiSettings._recordingDuration.text) / 300.0f);
+        float duration;
+        parsed = float.TryParse(uiSettings._recordingDuration.text, out duration);
+        if (!parsed)
+            duration = 3600;
+        videoRecord.maxVideos = (int)Mathf.Max(2, 3600 / 300.0f);
 
         // setup email settings
         emailSender.emailAccount = uiSettings._emailAccount.text;
         emailSender.emailPassword = uiSettings._emailPassword.text;
         emailSender.serverSMTP = uiSettings._serverSMTP.text;
-        emailSender.portSMTP = int.Parse(uiSettings._portSMTP.text);
+        int port;
+        parsed = int.TryParse(uiSettings._portSMTP.text, out port);
+        if (!parsed)
+            port = 587;
+        emailSender.portSMTP = port;
         emailSender.emailRecipient = uiSettings._emailRecipient.text;
     }
 
@@ -226,7 +239,10 @@ public class GameController : MonoBehaviour
             elapsedTime += Time.deltaTime;
 
             // if elapsed time is greater than 1hr
-            float duration = float.Parse(uiSettings.recordingDuration.text);
+            float duration;
+            bool parsed = float.TryParse(uiSettings.recordingDuration.text, out duration);
+            if (!parsed)
+                duration = 3600;
             if (elapsedTime >= duration)
             {
                 if (uiSettings._debugActive)
