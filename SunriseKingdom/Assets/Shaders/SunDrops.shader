@@ -1,4 +1,4 @@
-﻿Shader "Custom/SunVisualisationSpots"
+﻿Shader "Custom/SunDrops"
 {
 	Properties
 	{
@@ -11,7 +11,7 @@
 	}
 	SubShader
 	{
-		Tags { "RenderType"="Opaque" }
+		Tags{ "RenderType" = "Opaque" }
 		LOD 100
 
 		Pass
@@ -19,9 +19,9 @@
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
-			// make fog work
+					// make fog work
 			#pragma multi_compile_fog
-			
+
 			#include "UnityCG.cginc"
 
 			struct appdata
@@ -34,7 +34,7 @@
 			{
 				float2 uv : TEXCOORD0;
 				UNITY_FOG_COORDS(1)
-				float4 vertex : SV_POSITION;
+					float4 vertex : SV_POSITION;
 			};
 
 			uniform float size;
@@ -58,7 +58,7 @@
 			uniform int days;
 			uniform int shotsPerDay;
 
-			v2f vert (appdata v)
+			v2f vert(appdata v)
 			{
 				v2f o;
 				o.vertex = UnityObjectToClipPos(v.vertex);
@@ -81,12 +81,12 @@
 					lerp(hash(n + 57.0), hash(n + 58.0), f.x), f.y);
 			}
 
-			float map(float value, float low1, float high1, float low2, float high2) 
+			float map(float value, float low1, float high1, float low2, float high2)
 			{
 				return low2 + (value - low1) * (high2 - low2) / (high1 - low1);
 			}
-			
-			fixed4 frag (v2f i) : SV_Target
+
+			fixed4 frag(v2f i) : SV_Target
 			{
 				float4 col = float4(0, 0, 0, 1);
 				float2 uv = i.uv.xy;
@@ -98,7 +98,7 @@
 				for (int i = 0; i<days; i++)
 				{
 					// bubble seeds
-					float rad = min(_Time.y * Speed - (float)i/10.0, size);//siz;
+					float rad = min(_Time.y * Speed - (float)i / 10.0, size);//siz;
 					if (rad < 0) rad = 0;
 					float pox = map(sin(float(i)*546.13 + 7.5), -1, 1, 0.2, 6.2);
 					float poy = map(sin(float(i)*321.22 + 4.1), -1, 1, 0.1, 0.9);
@@ -106,17 +106,15 @@
 					// buble size, position and color
 					float2  pos = float2(pox, poy);//-1.0 - rad + (2.0 + 2.0*rad)*fmod(pha + 0.1*_Time.y*(0.2 + 0.8*siz), 1.0));
 					float dis = length(uv - pos);
-					float3  col = Colors1[i] * 1.0 / days * days;//lerp(float3(0.94, 0.3, 0.0), float3(0.1, 0.4, 0.8), 0.5 + 0.5*sin(float(i)*1.2 + 1.9));
-					// col+= 8.0*smoothstep( rad*0.95, rad, dis );
-
-					// render
+					float3  col = Colors1[i] * 1.0 / days * days;
+																	// render
 					float f = length(uv - pos) / rad;
 					float x = fmod(uv.x, 0.2);
 					float y = fmod(uv.y, 0.2);
 
-					f += noise(uv - (6.5 - uv) + _Time.y * WobbleSpeed);
+					f += noise((uv - (6.5 - uv)*f + _Time.y * WobbleSpeed)*3.0);
 					f = sqrt(clamp(1.0 - f*f, 0.0, 1.0));
-					color += col.xyz *(1.0 - smoothstep(rad*0.55, rad, dis)) * f;
+					color += f * f * f * f * f * f * f * Colors1[i];//col.xyz * (1.0 - smoothstep(rad*0.55, rad, dis)) * f;
 				}
 
 				col = float4(color, 1);
