@@ -6,7 +6,6 @@ using UnityEngine.EventSystems;
 
 public class GameController : MonoBehaviour
 {
-
     public GameObject uiCanvas;
     public UIController uiSettings;
     public SunriseController sunrise;
@@ -29,6 +28,8 @@ public class GameController : MonoBehaviour
     // Use this for initialization
     void Start () 
     {
+        Screen.SetResolution(3840, 600, true);
+
         // toggles
         emailSender.useThreading = useThreading;
         videoPlayback.emailActive = emailActive;

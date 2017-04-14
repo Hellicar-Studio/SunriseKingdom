@@ -171,21 +171,21 @@ public class VideoPlayback : MonoBehaviour {
         if (emailActive)
         {
             // on first playback capture 1 screenshot for each video at a specific time
-            if (!screenshotTaken && (int)elapsedTime == videoLoadTime)
+            if (!screenshotTaken && (int)elapsedTime == videoLoadTime + 10)
             {
                 CaptureScreenshot();
             }
-            else if ((int)elapsedTime != videoLoadTime)
+            else if ((int)elapsedTime != videoLoadTime + 10)
             {
                 screenshotTaken = false;
             }
 
             // on first playback send emails of the screenshots 10 seconds at the capture is taken
-            if (!screenshotEmailed && !emailSender.emailSent && (int)elapsedTime == videoLoadTime + 10)
+            if (!screenshotEmailed && !emailSender.emailSent && (int)elapsedTime == videoLoadTime + 20)
             {
                 SendEmail();
             }
-            else if (screenshotEmailed && (int)elapsedTime != videoLoadTime + 10)
+            else if (screenshotEmailed && (int)elapsedTime != videoLoadTime + 20)
             {
                 screenshotEmailed = false;
             }
