@@ -37,6 +37,7 @@ public class VideoPlayback : MonoBehaviour {
     private int extCount = 0;
     private bool filesExist = false;
     private bool screenshotTaken = false;
+    private bool screenshotEmailed = false;
 
     // disables all object renderers
     public void RenderMaterial(bool _active)
@@ -176,13 +177,17 @@ public class VideoPlayback : MonoBehaviour {
             }
             else if ((int)elapsedTime != videoLoadTime)
             {
-                if (screenshotTaken) screenshotTaken = false;
+                screenshotTaken = false;
             }
 
             // on first playback send emails of the screenshots 10 seconds at the capture is taken
-            if (!emailSender.emailSent && (int)elapsedTime == videoLoadTime + 10)
+            if (!screenshotEmailed && !emailSender.emailSent && (int)elapsedTime == videoLoadTime + 10)
             {
                 SendEmail();
+            }
+            else if (screenshotEmailed && (int)elapsedTime != videoLoadTime + 10)
+            {
+                screenshotEmailed = false;
             }
         }
     }
@@ -264,7 +269,11 @@ public class VideoPlayback : MonoBehaviour {
     private void SendEmail()
     {
         emailSender.item = itemAdjust(item);
-        if (!emailSender.emailSent) emailSender.emailSent = true;
+        if (emailSender.useThreading) emailSender.emailSent = true;
+        else emailSender.SendEmail();
+
+        if (debugActive)
+            Debug.Log("Screenshot " + emailSender.item + ".png has been emailed!");
 
         // when the last email in the list is sent, disable toggle
         if (itemAdjust(item) == VideoRecord.mostRecentRecording.Length - 1)
@@ -274,6 +283,8 @@ public class VideoPlayback : MonoBehaviour {
             if (debugActive)
                 Debug.Log("The email cycle is complete until next recording.");
         }
+
+        screenshotEmailed = true;
     }
 
     private void LoadVideo(int player, int _item, string[] _filePath)

@@ -38,7 +38,7 @@ public class SunriseController : MonoBehaviour {
 
     public string GetLocalTime()
     {
-        return DateTime.UtcNow.ToLocalTime().ToShortTimeString();
+        return DateTime.UtcNow.ToLocalTime().ToLongTimeString();
     }
 
     public string GetCurrentDate()
@@ -62,12 +62,12 @@ public class SunriseController : MonoBehaviour {
         }
     }
 
-    // gets sunrise time and converts UNIX/UTC to local time && short time (removes the date)
+    // gets sunrise time and converts UNIX/UTC to local time && long time
     // adds a specified minute offset at the end
     private string ConvertTime(int _time)
     {
         string t;
-        t = string.Format("{0:d/M/yyyy HH:mm:ss}", new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(_time).ToLocalTime().AddMinutes(minuteOffset).ToShortTimeString());
+        t = string.Format("{0:d/M/yyyy HH:mm:ss}", new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(_time).ToLocalTime().AddMinutes(minuteOffset).ToLongTimeString());
 
         return t;
     }

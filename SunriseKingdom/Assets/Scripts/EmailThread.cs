@@ -8,7 +8,8 @@ using System.Security.Cryptography.X509Certificates;
 
 public class EmailThread : MonoBehaviour
 {
-    #region Public data
+    [HideInInspector]
+    public bool useThreading;
     [HideInInspector]
     public string imagesFolder;
     [HideInInspector]
@@ -31,79 +32,86 @@ public class EmailThread : MonoBehaviour
     public bool debugActive;
     [HideInInspector]
     public bool emailSent = false;
-    #endregion
 
-    #region Private data
     private Thread _t1;
     private bool _t1Paused = false;
     private Mutex _mutex = new Mutex();
-    #endregion
 
-    #region Start
     void Start()
     {
-        _t1 = new Thread(_func1);
+        if (useThreading)
+        {
+            _t1 = new Thread(_func1);
+            _t1.Start();
+        }
     }
-    #endregion
 
-    #region Threads
     private void _func1()
     {
-        while (emailSent)
+        while (true)
         {
             _mutex.WaitOne();
             SendEmail();
             _mutex.ReleaseMutex();
 
-            do
-            {
-                Thread.Sleep(200);
-            }
-            while (_t1Paused);
+            //do
+            //{
+            //    Thread.Sleep(200);
+            //}
+            //while (_t1Paused);
         }
     }
 
-    void Update()
+    public void SendEmail()
     {
-        if (emailSent)
+        if (useThreading)
         {
-            if (!_t1.IsAlive)
+            if (emailSent)
             {
-                _t1.Start();
+                ProcessEmail();
+                emailSent = false;
             }
-            else
-                _t1Paused = !_t1Paused;
         }
+        else
+        {
+            ProcessEmail();
+        }
+        
+        // pauses the thread and stops
+        //_t1Paused = true;
+        //emailSent = false;
+        //_t1.Abort();
     }
-    #endregion
 
-    private void SendEmail()
+    private void ProcessEmail()
     {
+        // creates the email
         MailMessage mail = new MailMessage();
-
         mail.From = new MailAddress(emailAccount);
         mail.To.Add(emailRecipient);
         mail.Subject = subject + " " + item + ".png";
         mail.Body = messageBody;
 
+        // creates the attachment
         string attachmentPath = imagesFolder + item + ".png";
-        System.Net.Mail.Attachment attachment = new System.Net.Mail.Attachment(attachmentPath);
+        Attachment attachment = new Attachment(attachmentPath);
         mail.Attachments.Add(attachment);
 
+        // establishes a connection to the outgoing server (SMTP) and sends the email
         SmtpClient server = new SmtpClient(serverSMTP);
         server.Port = portSMTP;
-        server.Credentials = new System.Net.NetworkCredential(emailAccount, emailPassword) as ICredentialsByHost;
+        server.Credentials = new NetworkCredential(emailAccount, emailPassword) as ICredentialsByHost;
         server.EnableSsl = true;
         ServicePointManager.ServerCertificateValidationCallback =
             delegate (object s, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
             { return true; };
-        server.Send(mail);
+        server.SendAsync(mail, "Sending Email");
+    }
 
-        if (debugActive)
-            Debug.Log("Email "+ item + " has been successfully sent!");
-        
-        // pauses the thread and stops
-        _t1Paused = true;
-        emailSent = false;
+    // kills thread on exit
+    void OnApplicationQuit()
+    {
+        if (useThreading)
+            _t1.Abort();
     }
 }
