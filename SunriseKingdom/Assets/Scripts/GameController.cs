@@ -17,6 +17,9 @@ public class GameController : MonoBehaviour
     [Header("Support")]
     public bool manualRecord = false;
     public bool runFirstRun = false;
+    [Header("Email Debug")]
+    public bool emailActive = false;
+    public bool useThreading = false;
 
     private bool isSunriseActive = false;
     private bool isUIActive = true;
@@ -26,6 +29,10 @@ public class GameController : MonoBehaviour
     // Use this for initialization
     void Start () 
     {
+        // toggles
+        emailSender.useThreading = useThreading;
+        videoPlayback.emailActive = emailActive;
+
         // enables ui canvas on launch
         uiCanvas.SetActive(isUIActive);
 
@@ -103,7 +110,7 @@ public class GameController : MonoBehaviour
         parsed = int.TryParse(uiSettings._portSMTP.text, out port);
         if (!parsed)
             port = 587;
-        emailSender.portSMTP = port;
+        emailSender.portSMTP = 587;// port;
         emailSender.emailRecipient = uiSettings._emailRecipient.text;
     }
 
@@ -299,7 +306,7 @@ public class GameController : MonoBehaviour
             {
                 if (uiSettings._debugActive)
                 {
-                    Debug.Log("Sunrise cycle is complete!");
+                    Debug.Log("Sunrise cycle is complete! " + sunrise.GetLocalTime());
                     Debug.Log("Total time was " + elapsedTime + " seconds.");
                 }
 
