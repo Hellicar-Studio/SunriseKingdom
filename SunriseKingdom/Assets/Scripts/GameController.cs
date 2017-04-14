@@ -101,7 +101,7 @@ public class GameController : MonoBehaviour
         parsed = float.TryParse(uiSettings._recordingDuration.text, out duration);
         if (!parsed)
             duration = 3600;
-        videoRecord.maxVideos = (int)Mathf.Max(2, 3600 / 300.0f);
+        videoRecord.maxVideos = (int)Mathf.Max(2, duration / 300.0f);
 
         // setup email settings
         emailSender.emailAccount = uiSettings._emailAccount.text;
