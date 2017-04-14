@@ -11,6 +11,8 @@ public class VisualisationController : MonoBehaviour {
     public int days;
     [Range(0, 12)]
     public int shotsPerDay;
+
+    public GameObject player;
 	// Use this for initialization
 	void Start () {
         colors = new Color[5][];
@@ -39,14 +41,17 @@ public class VisualisationController : MonoBehaviour {
 
     // Update is called once per frame
     void Update () {
-        if (mat != null)
+        Debug.Log("Step");
+    }
+
+    private void OnRenderImage(RenderTexture source, RenderTexture destination)
+    {
+        for (int i = 0; i < colors.Length; i++)
         {
-            for(int i = 0; i < colors.Length; i++)
-            {
-                mat.SetColorArray(uniformArrayName + (i+1).ToString(), colors[i]);
-            }
-            mat.SetInt("days", days);
-            mat.SetInt("shotsPerDay", colors.Length-1);
+            mat.SetColorArray(uniformArrayName + (i + 1).ToString(), colors[i]);
         }
+        mat.SetInt("days", days);
+        mat.SetInt("shotsPerDay", colors.Length - 1);
+        Graphics.Blit(source, destination, mat);
     }
 }
