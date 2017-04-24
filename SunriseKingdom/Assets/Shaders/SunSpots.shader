@@ -7,7 +7,6 @@
 		size("Size", Range(0.0, 1.0)) = 0.01
 		Speed("Speed", Range(0.001, 1.0)) = 1.0
 		WobbleSpeed("Wobble Speed", Range(0.0, 1.0)) = 0.0
-
 	}
 	SubShader
 	{
@@ -47,16 +46,16 @@
 			uniform float4 Colors3[365];
 			uniform float4 Colors4[365];
 			uniform float4 Colors5[365];
-			//uniform float4 Colors6[365];
-			//uniform float4 Colors7[365];
-			//uniform float4 Colors8[365];
-			//uniform float4 Colors9[365];
+			uniform float4 Colors6[365];
+			// uniform float4 Colors7[365];
+			// uniform float4 Colors8[365];
+			// uniform float4 Colors9[365];
 			// uniform float4 Colors10[365];
 			// uniform float4 Colors11[365];
 			// uniform float4 Colors12[365];
 
-			uniform int days;
-			uniform int shotsPerDay;
+			uniform int days = 10.0;
+			uniform int shotsPerDay = 1.0;
 
 			v2f vert (appdata v)
 			{
@@ -66,19 +65,35 @@
 				return o;
 			}
 
-			float hash(float n)
-			{
-				return frac(sin(n)*43758.5453);
+			// 2D Random
+			float random(in float2 st) {
+				return frac(sin(dot(st.xy,
+					float2(12.9898, 78.233)))
+					* 43758.5453123);
 			}
 
-			float noise(in float2 x)
-			{
-				float2 p = floor(x);
-				float2 f = frac(x);
-				f = f*f*(3.0 - 2.0*f);
-				float n = p.x + p.y*57.0;
-				return lerp(lerp(hash(n + 0.0), hash(n + 1.0), f.x),
-					lerp(hash(n + 57.0), hash(n + 58.0), f.x), f.y);
+			// 2D Noise based on Morgan McGuire @morgan3d
+			// https://www.shadertoy.com/view/4dS3Wd
+			float noise(in float2 st) {
+				float2 i = floor(st);
+				float2 f = frac(st);
+
+				// Four corners in 2D of a tile
+				float a = random(i);
+				float b = random(i + float2(1.0, 0.0));
+				float c = random(i + float2(0.0, 1.0));
+				float d = random(i + float2(1.0, 1.0));
+
+				// Smooth Interpolation
+
+				// Cubic Hermine Curve.  Same as SmoothStep()
+				float2 u = f*f*(3.0 - 2.0*f);
+				// u = smoothstep(0.,1.,f);
+
+				// Mix 4 coorners porcentages
+				return lerp(a, b, u.x) +
+					(c - a)* u.y * (1.0 - u.x) +
+					(d - b) * u.x * u.y;
 			}
 
 			float map(float value, float low1, float high1, float low2, float high2) 
@@ -103,10 +118,10 @@
 					float pox = map(sin(float(i)*546.13 + 7.5), -1, 1, 0.2, 6.2);
 					float poy = map(sin(float(i)*321.22 + 4.1), -1, 1, 0.1, 0.9);
 
-					// buble size, position and color
+					// bubble size, position and color
 					float2  pos = float2(pox, poy);//-1.0 - rad + (2.0 + 2.0*rad)*fmod(pha + 0.1*_Time.y*(0.2 + 0.8*siz), 1.0));
 					float dis = length(uv - pos);
-					float3  col = Colors1[i] * 1.0 / days * days;//lerp(float3(0.94, 0.3, 0.0), float3(0.1, 0.4, 0.8), 0.5 + 0.5*sin(float(i)*1.2 + 1.9));
+					float3  col = Colors1[i];//lerp(float3(0.94, 0.3, 0.0), float3(0.1, 0.4, 0.8), 0.5 + 0.5*sin(float(i)*1.2 + 1.9));
 					// col+= 8.0*smoothstep( rad*0.95, rad, dis );
 
 					// render
@@ -114,7 +129,7 @@
 					float x = fmod(uv.x, 0.2);
 					float y = fmod(uv.y, 0.2);
 
-					f += noise(uv - (6.5 - uv) + _Time.y * WobbleSpeed);
+					f += noise(uv - (6.5 - uv) / (size*0.8) + _Time.y * WobbleSpeed);
 					f = sqrt(clamp(1.0 - f*f, 0.0, 1.0));
 					color += col.xyz *(1.0 - smoothstep(rad*0.55, rad, dis)) * f;
 				}

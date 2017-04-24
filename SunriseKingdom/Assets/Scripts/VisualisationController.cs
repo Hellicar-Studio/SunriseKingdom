@@ -12,19 +12,22 @@ public class VisualisationController : MonoBehaviour {
     [Range(0, 12)]
     public int shotsPerDay;
 
-    public GameObject player;
+    public float pressed;
+
+    public float map(float value, float low1, float high1, float low2, float high2)
+    {
+        return low2 + (value - low1) * (high2 - low2) / (high1 - low1);
+    }
+
 	// Use this for initialization
 	void Start () {
+        Application.targetFrameRate = 60;
         colors = new Color[5][];
         for(int i = 0; i < colors.Length; i++)
         {
             colors[i] = new Color[365];
-            float bonus = 0.1f;//(float)i *0.3f;
-            //if (i == 0)
-            //    bonus = -0.2f;
-            //else
-            //    bonus = 0.2f;
-            //
+            float bonus = 0.1f;
+
             float RMin = 0.7f + bonus;
             float RMax = 0.9f + bonus;
             float GMin = 0.32f + bonus;
@@ -37,11 +40,21 @@ public class VisualisationController : MonoBehaviour {
                 colors[i][j] = new Color(Random.Range(RMin, RMax), Random.Range(GMin, GMax), Random.Range(BMin, BMax), 1);
             }
         }
+
+        pressed = 0.0f;
     }
 
     // Update is called once per frame
     void Update () {
-        Debug.Log("Step");
+        //Debug.Log("Step");
+        if (Input.GetMouseButtonDown(0))
+        {
+            pressed = 1.0f;
+        }
+        else if(Input.GetMouseButtonUp(0))
+        {
+            pressed = 0.0f;
+        }
     }
 
     private void OnRenderImage(RenderTexture source, RenderTexture destination)
@@ -50,8 +63,14 @@ public class VisualisationController : MonoBehaviour {
         {
             mat.SetColorArray(uniformArrayName + (i + 1).ToString(), colors[i]);
         }
+        Debug.Log(colors[0][0].r);
         mat.SetInt("days", days);
+        mat.SetFloat("size", map(days, 1, 365, 1, 0));
         mat.SetInt("shotsPerDay", colors.Length - 1);
+
+        Vector3 mouseStatus = new Vector3(Input.mousePosition.x, Input.mousePosition.y, pressed);
+        mat.SetVector("_Mouse", mouseStatus);
+
         Graphics.Blit(source, destination, mat);
     }
 }

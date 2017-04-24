@@ -47,10 +47,10 @@
 			uniform float4 Colors3[365];
 			uniform float4 Colors4[365];
 			uniform float4 Colors5[365];
-			//uniform float4 Colors6[365];
-			//uniform float4 Colors7[365];
-			//uniform float4 Colors8[365];
-			//uniform float4 Colors9[365];
+			// uniform float4 Colors6[365];
+			// uniform float4 Colors7[365];
+			// uniform float4 Colors8[365];
+			// uniform float4 Colors9[365];
 			// uniform float4 Colors10[365];
 			// uniform float4 Colors11[365];
 			// uniform float4 Colors12[365];

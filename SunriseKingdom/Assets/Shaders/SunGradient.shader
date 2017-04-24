@@ -120,7 +120,7 @@
 				//col += getColorPercentage(col3, col4, 2, i.uv.y, partitionSize.y);
 				//col += getColorPercentage(col4, col5, 3, i.uv.y, partitionSize.y);
 
-				return col;
+				return col;//float4(days, 0, 0, 1);
 			}
 			ENDCG
 		}
