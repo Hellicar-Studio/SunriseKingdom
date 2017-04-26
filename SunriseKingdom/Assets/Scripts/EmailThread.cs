@@ -17,11 +17,8 @@ public class EmailThread : MonoBehaviour
     [HideInInspector]
     public string emailRecipient;
     [HideInInspector]
-<<<<<<< HEAD
-=======
     public string subject;
     [HideInInspector]
->>>>>>> a65c0369eb9d7203440bc798a2d63f4f1b063aed
     public string messageBody;
     [HideInInspector]
     public string emailPassword;
@@ -35,12 +32,8 @@ public class EmailThread : MonoBehaviour
     public bool debugActive;
     [HideInInspector]
     public bool emailSent = false;
-<<<<<<< HEAD
     [HideInInspector]
     public int videosLength;
-=======
->>>>>>> a65c0369eb9d7203440bc798a2d63f4f1b063aed
-
     private Thread _t1;
     private bool _t1Paused = false;
     private Mutex _mutex = new Mutex();
@@ -97,7 +90,6 @@ public class EmailThread : MonoBehaviour
         MailMessage mail = new MailMessage();
         mail.From = new MailAddress(emailAccount);
         mail.To.Add(emailRecipient);
-<<<<<<< HEAD
         mail.Subject = "Sunrise Kingdom Images"; //subject + " " + item + ".png";
         mail.Body = messageBody;
 
@@ -113,15 +105,6 @@ public class EmailThread : MonoBehaviour
             Attachment attachment = new Attachment(attachmentPath);
             mail.Attachments.Add(attachment);
         }
-=======
-        mail.Subject = subject + " " + item + ".png";
-        mail.Body = messageBody;
-
-        // creates the attachment
-        string attachmentPath = imagesFolder + item + ".png";
-        Attachment attachment = new Attachment(attachmentPath);
-        mail.Attachments.Add(attachment);
->>>>>>> a65c0369eb9d7203440bc798a2d63f4f1b063aed
 
         // establishes a connection to the outgoing server (SMTP) and sends the email
         SmtpClient server = new SmtpClient(serverSMTP);

@@ -360,7 +360,6 @@ public class GameController : MonoBehaviour
                 videoPlayback.UpdatePlayer();
             }
         }
-<<<<<<< HEAD
         
         // updates email message body
         if (!videoPlayback.screenshotEmailed)
@@ -373,7 +372,5 @@ public class GameController : MonoBehaviour
             
             emailSender.messageBody = msg;
         }
-=======
->>>>>>> a65c0369eb9d7203440bc798a2d63f4f1b063aed
     }
 }

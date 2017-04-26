@@ -105,16 +105,16 @@
     <None Include="Assets\Addons\JsonDotNet\link.xml" />
     <None Include="Assets\Shaders\SunDrops.shader" />
     <None Include="Assets\Shaders\SunGradient.shader" />
-<<<<<<< HEAD
     <None Include="Assets\Shaders\SunGrowth.shader" />
-=======
->>>>>>> a65c0369eb9d7203440bc798a2d63f4f1b063aed
+    <None Include="Assets\Shaders\SunLife.shader" />
+    <None Include="Assets\Shaders\SunPaint.shader" />
     <None Include="Assets\Shaders\SunSpots.shader" />
     <None Include="Assets\Standard Assets\Effects\ImageEffects\Shaders\ColorCorrection3DLut.shader" />
     <None Include="Assets\Standard Assets\Effects\ImageEffects\Shaders\ColorCorrectionCurves.shader" />
     <None Include="Assets\Standard Assets\Effects\ImageEffects\Shaders\ColorCorrectionCurvesSimple.shader" />
     <None Include="Assets\Standard Assets\Effects\ImageEffects\Shaders\ColorCorrectionEffect.shader" />
     <None Include="Assets\Standard Assets\Effects\ImageEffects\Shaders\ColorCorrectionSelective.shader" />
+    <None Include="Assets\texture\life\LifeShader.shader" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\SyntaxTree\UnityVS\2015\UnityVS.CSharp.targets" />
 </Project>

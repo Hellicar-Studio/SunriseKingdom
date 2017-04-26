@@ -1,7 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2015
-<<<<<<< HEAD
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SunriseKingdom.CSharp.Plugins", "SunriseKingdom.CSharp.Plugins.csproj", "{DBE580E9-7253-6C83-4331-1858896AC334}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SunriseKingdom.CSharp", "SunriseKingdom.CSharp.csproj", "{2CA23473-6E19-7003-C53B-0EA4E9789656}"
@@ -9,15 +8,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SunriseKingdom.CSharp.Editor.Plugins", "SunriseKingdom.CSharp.Editor.Plugins.csproj", "{F6B779A9-8B9A-B298-B2F2-819033986B67}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SunriseKingdom.CSharp.Editor", "SunriseKingdom.CSharp.Editor.csproj", "{609C058E-EDC0-FD13-E5E8-24DA416727EB}"
-=======
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SunriseKingdom.Plugins", "SunriseKingdom.Plugins.csproj", "{3D96785A-0809-0847-EDA9-7160943EC622}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SunriseKingdom", "SunriseKingdom.csproj", "{BD0508AB-219C-E1E2-5E85-4F966A0C241D}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SunriseKingdom.Editor.Plugins", "SunriseKingdom.Editor.Plugins.csproj", "{2BC469A1-AD09-3A1D-27D2-CCBCA0203641}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SunriseKingdom.Editor", "SunriseKingdom.Editor.csproj", "{8386310F-354D-14E5-F447-ED9BCA5F92CF}"
->>>>>>> a65c0369eb9d7203440bc798a2d63f4f1b063aed
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,7 +15,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-<<<<<<< HEAD
 		{DBE580E9-7253-6C83-4331-1858896AC334}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DBE580E9-7253-6C83-4331-1858896AC334}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DBE580E9-7253-6C83-4331-1858896AC334}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -42,24 +31,6 @@ Global
 		{609C058E-EDC0-FD13-E5E8-24DA416727EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{609C058E-EDC0-FD13-E5E8-24DA416727EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{609C058E-EDC0-FD13-E5E8-24DA416727EB}.Release|Any CPU.Build.0 = Release|Any CPU
-=======
-		{3D96785A-0809-0847-EDA9-7160943EC622}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3D96785A-0809-0847-EDA9-7160943EC622}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3D96785A-0809-0847-EDA9-7160943EC622}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3D96785A-0809-0847-EDA9-7160943EC622}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BD0508AB-219C-E1E2-5E85-4F966A0C241D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BD0508AB-219C-E1E2-5E85-4F966A0C241D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BD0508AB-219C-E1E2-5E85-4F966A0C241D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BD0508AB-219C-E1E2-5E85-4F966A0C241D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2BC469A1-AD09-3A1D-27D2-CCBCA0203641}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2BC469A1-AD09-3A1D-27D2-CCBCA0203641}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2BC469A1-AD09-3A1D-27D2-CCBCA0203641}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2BC469A1-AD09-3A1D-27D2-CCBCA0203641}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8386310F-354D-14E5-F447-ED9BCA5F92CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8386310F-354D-14E5-F447-ED9BCA5F92CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8386310F-354D-14E5-F447-ED9BCA5F92CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8386310F-354D-14E5-F447-ED9BCA5F92CF}.Release|Any CPU.Build.0 = Release|Any CPU
->>>>>>> a65c0369eb9d7203440bc798a2d63f4f1b063aed
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
