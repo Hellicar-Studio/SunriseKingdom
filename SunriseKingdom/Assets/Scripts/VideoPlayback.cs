@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using RenderHeads.Media.AVProVideo;
 using UnityEngine.UI;
+using System.IO;
 
 public class VideoPlayback : MonoBehaviour {
 
@@ -18,7 +19,7 @@ public class VideoPlayback : MonoBehaviour {
     public string imageFolder = "D:\\SunriseData/Images/";
     [HideInInspector]
     public bool beginPlayback = false;
-    [HideInInspector]
+    //[HideInInspector]
     public bool emailActive = false;
     [HideInInspector]
     public bool debugActive = false;
@@ -175,7 +176,7 @@ public class VideoPlayback : MonoBehaviour {
             // on first playback capture 1 screenshot for each video at a specific time
             if (!screenshotTaken && (int)elapsedTime == videoLoadTime + 10)
             {
-                CaptureScreenshot();
+                StartCoroutine(CaptureScreenshot());
             }
             else if ((int)elapsedTime != videoLoadTime + 10)
             {
@@ -190,6 +191,25 @@ public class VideoPlayback : MonoBehaviour {
                 SendEmail();
             }
         }
+    }
+
+    public IEnumerator ConvertToJpg(string path)
+    {
+        string filePath = "file:///" + path + ".png";
+        Debug.Log("Path to PNG: " + path + ".png");
+        WWW localFile = new WWW(filePath);
+
+        yield return localFile;
+
+        Texture2D tex = localFile.texture;
+        Debug.Log("Width: " + tex.width);
+        Debug.Log("Height: " + tex.height);
+
+        byte[] bytes = tex.EncodeToJPG();
+        FileStream file = File.Create(path + ".jpg");
+        Debug.Log("Path to JPG: " + path + ".jpg");
+        file.Write(bytes, 0, bytes.Length);
+        file.Close();
     }
 
     private void MediaControls()
@@ -256,9 +276,13 @@ public class VideoPlayback : MonoBehaviour {
         return itemCorrected;
     }
 
-    private void CaptureScreenshot()
+    private IEnumerator CaptureScreenshot()
     {
-        Application.CaptureScreenshot(imageFolder + itemAdjust(item) + ".png");
+        string path = imageFolder + "\\Image" + itemAdjust(item);
+        Debug.Log(path + ".png");
+        Application.CaptureScreenshot(path + ".png");
+        yield return null;
+        StartCoroutine(ConvertToJpg(path));
 
         if (debugActive)
             Debug.Log("Screenshot " + itemAdjust(item) + ".png has been saved!");

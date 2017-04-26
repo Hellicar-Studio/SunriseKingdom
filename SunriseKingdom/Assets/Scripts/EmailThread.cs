@@ -101,7 +101,7 @@ public class EmailThread : MonoBehaviour
         // creates an attachment array
         for (int i = 0; i < videosLength; i++)
         {
-            string attachmentPath = imagesFolder + i + ".png";
+            string attachmentPath = imagesFolder + i + ".jpg";
             Attachment attachment = new Attachment(attachmentPath);
             mail.Attachments.Add(attachment);
         }
