@@ -158,6 +158,7 @@
     <None Include="Assets\Addons\JsonDotNet\link.xml" />
     <None Include="Assets\Shaders\SunDrops.shader" />
     <None Include="Assets\Shaders\SunGradient.shader" />
+    <None Include="Assets\Shaders\SunGrowth.shader" />
     <None Include="Assets\Shaders\SunSpots.shader" />
     <None Include="Assets\Standard Assets\Effects\ImageEffects\Shaders\ColorCorrection3DLut.shader" />
     <None Include="Assets\Standard Assets\Effects\ImageEffects\Shaders\ColorCorrectionCurves.shader" />
