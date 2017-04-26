@@ -37,11 +37,39 @@ public class VisualisationController : MonoBehaviour {
 
             for (int j = 0; j < colors[i].Length; j++)
             {
-                colors[i][j] = new Color(Random.Range(RMin, RMax), Random.Range(GMin, GMax), Random.Range(BMin, BMax), 1);
+                colors[i][j] = Color.black;//new Color(Random.Range(RMin, RMax), Random.Range(GMin, GMax), Random.Range(BMin, BMax), 1);
             }
         }
 
+        StartCoroutine(appendNewColors());
+
         pressed = 0.0f;
+    }
+
+    public IEnumerator appendNewColors()
+    {
+        // for each of the images in the images folder...
+        for (int i = 0; i < 1; i++)
+        {
+            string filePath = "file:///" + Application.streamingAssetsPath + "/Images3" + ".png";
+            WWW localFile = new WWW(filePath);
+
+            yield return localFile;
+
+            Texture2D tex = localFile.texture;
+
+            Color[] pix = tex.GetPixels(tex.width / 2 - 50, tex.height / 2 - 50, 100, 100);
+
+            Color avg = Color.black;
+            int step = 10;
+            for(int j = 0; j < pix.Length; j += step)
+            {
+                avg += pix[j] * step/pix.Length;
+            }
+
+            colors[0][0] = avg;
+        }
+
     }
 
     // Update is called once per frame
@@ -63,7 +91,6 @@ public class VisualisationController : MonoBehaviour {
         {
             mat.SetColorArray(uniformArrayName + (i + 1).ToString(), colors[i]);
         }
-        Debug.Log(colors[0][0].r);
         mat.SetInt("days", days);
         mat.SetFloat("size", map(days, 1, 365, 1, 0));
         mat.SetInt("shotsPerDay", colors.Length - 1);
