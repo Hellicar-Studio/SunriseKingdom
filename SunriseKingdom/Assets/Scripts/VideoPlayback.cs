@@ -22,11 +22,18 @@ public class VideoPlayback : MonoBehaviour {
     public bool emailActive = false;
     [HideInInspector]
     public bool debugActive = false;
+<<<<<<< HEAD
     [HideInInspector]
     public bool screenshotEmailed = true;
 
     //controls
     public Slider playhead;
+=======
+
+    public Slider playhead;
+
+    //controls
+>>>>>>> a65c0369eb9d7203440bc798a2d63f4f1b063aed
     public bool play = false;
     public bool stop = false;
     public bool pause = false;
@@ -38,6 +45,10 @@ public class VideoPlayback : MonoBehaviour {
     private int extCount = 0;
     private bool filesExist = false;
     private bool screenshotTaken = false;
+<<<<<<< HEAD
+=======
+    private bool screenshotEmailed = false;
+>>>>>>> a65c0369eb9d7203440bc798a2d63f4f1b063aed
 
     // disables all object renderers
     public void RenderMaterial(bool _active)
@@ -102,8 +113,11 @@ public class VideoPlayback : MonoBehaviour {
 
             // toggle playback flag
             beginPlayback = true;
+<<<<<<< HEAD
 
             screenshotEmailed = true;
+=======
+>>>>>>> a65c0369eb9d7203440bc798a2d63f4f1b063aed
         }
         else
         {
@@ -182,12 +196,23 @@ public class VideoPlayback : MonoBehaviour {
                 screenshotTaken = false;
             }
 
+<<<<<<< HEAD
             // on first playback, will send an email of all the screenshots
             // 20 seconds after the last capture is taken
+=======
+            // on first playback send emails of the screenshots 10 seconds at the capture is taken
+>>>>>>> a65c0369eb9d7203440bc798a2d63f4f1b063aed
             if (!screenshotEmailed && !emailSender.emailSent && (int)elapsedTime == videoLoadTime + 20)
             {
                 SendEmail();
             }
+<<<<<<< HEAD
+=======
+            else if (screenshotEmailed && (int)elapsedTime != videoLoadTime + 20)
+            {
+                screenshotEmailed = false;
+            }
+>>>>>>> a65c0369eb9d7203440bc798a2d63f4f1b063aed
         }
     }
 
@@ -262,31 +287,51 @@ public class VideoPlayback : MonoBehaviour {
         if (debugActive)
             Debug.Log("Screenshot " + itemAdjust(item) + ".png has been saved!");
 
+<<<<<<< HEAD
         // when the last email in the list is sent, disable toggle
         if (itemAdjust(item) == VideoRecord.mostRecentRecording.Length - 1)
         {
             screenshotEmailed = false;
         }
 
+=======
+>>>>>>> a65c0369eb9d7203440bc798a2d63f4f1b063aed
         screenshotTaken = true;
     }
 
     private void SendEmail()
     {
+<<<<<<< HEAD
         // send the video file amount to the email sender's attachment array
         emailSender.videosLength = VideoRecord.mostRecentRecording.Length;
 
         //emailSender.item = itemAdjust(item);
+=======
+        emailSender.item = itemAdjust(item);
+>>>>>>> a65c0369eb9d7203440bc798a2d63f4f1b063aed
         if (emailSender.useThreading) emailSender.emailSent = true;
         else emailSender.SendEmail();
 
         if (debugActive)
+<<<<<<< HEAD
             Debug.Log(emailSender.videosLength + " screenshots have been emailed!");
 
         emailActive = false;
 
         if (debugActive)
             Debug.Log("The email cycle is complete until next recording.");
+=======
+            Debug.Log("Screenshot " + emailSender.item + ".png has been emailed!");
+
+        // when the last email in the list is sent, disable toggle
+        if (itemAdjust(item) == VideoRecord.mostRecentRecording.Length - 1)
+        {
+            emailActive = false;
+
+            if (debugActive)
+                Debug.Log("The email cycle is complete until next recording.");
+        }
+>>>>>>> a65c0369eb9d7203440bc798a2d63f4f1b063aed
 
         screenshotEmailed = true;
     }
