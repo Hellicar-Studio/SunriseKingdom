@@ -32,7 +32,8 @@ public class EmailThread : MonoBehaviour
     public bool debugActive;
     [HideInInspector]
     public bool emailSent = false;
-
+    [HideInInspector]
+    public int videosLength;
     private Thread _t1;
     private bool _t1Paused = false;
     private Mutex _mutex = new Mutex();
@@ -89,13 +90,21 @@ public class EmailThread : MonoBehaviour
         MailMessage mail = new MailMessage();
         mail.From = new MailAddress(emailAccount);
         mail.To.Add(emailRecipient);
-        mail.Subject = subject + " " + item + ".png";
+        mail.Subject = "Sunrise Kingdom Images"; //subject + " " + item + ".png";
         mail.Body = messageBody;
 
-        // creates the attachment
-        string attachmentPath = imagesFolder + item + ".png";
-        Attachment attachment = new Attachment(attachmentPath);
-        mail.Attachments.Add(attachment);
+        //// creates the attachment
+        //string attachmentPath = imagesFolder + item + ".png";
+        //Attachment attachment = new Attachment(attachmentPath);
+        //mail.Attachments.Add(attachment);
+
+        // creates an attachment array
+        for (int i = 0; i < videosLength; i++)
+        {
+            string attachmentPath = imagesFolder + i + ".png";
+            Attachment attachment = new Attachment(attachmentPath);
+            mail.Attachments.Add(attachment);
+        }
 
         // establishes a connection to the outgoing server (SMTP) and sends the email
         SmtpClient server = new SmtpClient(serverSMTP);

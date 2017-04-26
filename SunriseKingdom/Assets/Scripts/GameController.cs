@@ -360,5 +360,17 @@ public class GameController : MonoBehaviour
                 videoPlayback.UpdatePlayer();
             }
         }
+        
+        // updates email message body
+        if (!videoPlayback.screenshotEmailed)
+        {
+            // gather system data to send along
+            string msg = "System Date: " + uiSettings.currentDate.text + "\n" +
+                "Sunrise Time: " + uiSettings.sunriseTimeCur.text + "\n" +
+                "Recording Start Time: " + uiSettings.recordingStartTime.text + "\n" +
+                "Recording Stop Time: " + uiSettings.recordingStopTime.text;
+            
+            emailSender.messageBody = msg;
+        }
     }
 }
