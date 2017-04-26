@@ -35,7 +35,6 @@ public class EmailThread : MonoBehaviour
     [HideInInspector]
     public int videosLength;
     private Thread _t1;
-    private bool _t1Paused = false;
     private Mutex _mutex = new Mutex();
 
     void Start()
@@ -54,12 +53,6 @@ public class EmailThread : MonoBehaviour
             _mutex.WaitOne();
             SendEmail();
             _mutex.ReleaseMutex();
-
-            //do
-            //{
-            //    Thread.Sleep(200);
-            //}
-            //while (_t1Paused);
         }
     }
 
@@ -77,11 +70,6 @@ public class EmailThread : MonoBehaviour
         {
             ProcessEmail();
         }
-        
-        // pauses the thread and stops
-        //_t1Paused = true;
-        //emailSent = false;
-        //_t1.Abort();
     }
 
     private void ProcessEmail()
@@ -93,15 +81,10 @@ public class EmailThread : MonoBehaviour
         mail.Subject = "Sunrise Kingdom Images"; //subject + " " + item + ".png";
         mail.Body = messageBody;
 
-        //// creates the attachment
-        //string attachmentPath = imagesFolder + item + ".png";
-        //Attachment attachment = new Attachment(attachmentPath);
-        //mail.Attachments.Add(attachment);
-
         // creates an attachment array
         for (int i = 0; i < videosLength; i++)
         {
-            string attachmentPath = imagesFolder + i + ".png";
+            string attachmentPath = imagesFolder + i + ".jpg";
             Attachment attachment = new Attachment(attachmentPath);
             mail.Attachments.Add(attachment);
         }

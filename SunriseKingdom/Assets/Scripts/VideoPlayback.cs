@@ -175,17 +175,23 @@ public class VideoPlayback : MonoBehaviour {
             // on first playback capture 1 screenshot for each video at a specific time
             if (!screenshotTaken && (int)elapsedTime == videoLoadTime + 10)
             {
-                CaptureScreenshot();
+                // when the last email in the list is sent, disable toggle
+                if (itemAdjust(item) == VideoRecord.mostRecentRecording.Length - 1)
+                {
+                    screenshotEmailed = false;
+                }
+
+                StartCoroutine(CaptureScreenshot());
+                screenshotTaken = true;
             }
-            else if ((int)elapsedTime != videoLoadTime + 10)
+            else if ((int)elapsedTime == videoLoadTime + 11)
             {
                 screenshotTaken = false;
             }
             
             // on first playback, will send an email of all the screenshots
-            // 20 seconds after the last capture is taken
-            // on first playback send emails of the screenshots 10 seconds at the capture is taken
-            if (!screenshotEmailed && !emailSender.emailSent && (int)elapsedTime == videoLoadTime + 20)
+            // 30 seconds after the last capture is taken
+            if (!screenshotEmailed && !emailSender.emailSent && (int)elapsedTime == videoLoadTime + 30)
             {
                 SendEmail();
             }
@@ -256,20 +262,26 @@ public class VideoPlayback : MonoBehaviour {
         return itemCorrected;
     }
 
-    private void CaptureScreenshot()
+    IEnumerator CaptureScreenshot()
     {
-        Application.CaptureScreenshot(imageFolder + itemAdjust(item) + ".png");
+        screenshotTaken = false;
+
+        yield return new WaitForEndOfFrame();
+
+        string path = imageFolder + itemAdjust(item) + ".jpg";
+
+        Texture2D img = new Texture2D(Screen.width, Screen.height);
+
+        // get Image from screen
+        img.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0);
+        img.Apply();
+
+        // convert to JPG
+        byte[] imageBytes = img.EncodeToJPG();
+        System.IO.File.WriteAllBytes(path, imageBytes);
 
         if (debugActive)
-            Debug.Log("Screenshot " + itemAdjust(item) + ".png has been saved!");
-        
-        // when the last email in the list is sent, disable toggle
-        if (itemAdjust(item) == VideoRecord.mostRecentRecording.Length - 1)
-        {
-            screenshotEmailed = false;
-        }
-
-        screenshotTaken = true;
+            Debug.Log("Screenshot " + itemAdjust(item) + ".jpg has been saved!");
     }
 
     private void SendEmail()
@@ -287,15 +299,6 @@ public class VideoPlayback : MonoBehaviour {
 
         if (debugActive)
             Debug.Log("The email cycle is complete until next recording.");
-
-        // when the last email in the list is sent, disable toggle
-        if (itemAdjust(item) == VideoRecord.mostRecentRecording.Length - 1)
-        {
-            emailActive = false;
-
-            if (debugActive)
-                Debug.Log("The email cycle is complete until next recording.");
-        }
 
         screenshotEmailed = true;
     }

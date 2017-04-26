@@ -117,7 +117,7 @@ public class GameController : MonoBehaviour
 
     void UpdateUIText()
     {
-        if (uiSettings._debugActive)
+        if (uiSettings._debugActive.isOn)
         {
             Debug.Log("Updating UI textfields...");
         }
