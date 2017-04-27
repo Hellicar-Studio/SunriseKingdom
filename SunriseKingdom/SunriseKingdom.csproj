@@ -162,6 +162,7 @@
     <None Include="Assets\Standard Assets\Effects\ImageEffects\Shaders\ColorCorrectionSelective.shader" />
     <None Include="Assets\StreamingAssets\build_info.txt" />
     <None Include="Assets\texture\life\LifeShader.shader" />
+    <None Include="Assets\texture\life\SmoothLife.shader" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />
