@@ -7,10 +7,6 @@
 		size("Size", Range(0.0, 1.0)) = 0.01
 		Speed("Speed", Range(0.001, 1.0)) = 1.0
 		WobbleSpeed("Wobble Speed", Range(0.0, 1.0)) = 0.0
-<<<<<<< HEAD
-
-=======
->>>>>>> a65c0369eb9d7203440bc798a2d63f4f1b063aed
 	}
 	SubShader
 	{
@@ -43,35 +39,12 @@
 			uniform float size;
 			uniform float Speed;
 			uniform float WobbleSpeed;
+			uniform sampler2D Texture;
 
-			//uniform float4 Colors[3][365];
-			uniform float4 Colors1[365];
-			uniform float4 Colors2[365];
-			uniform float4 Colors3[365];
-			uniform float4 Colors4[365];
-			uniform float4 Colors5[365];
-<<<<<<< HEAD
-			//uniform float4 Colors6[365];
-			//uniform float4 Colors7[365];
-			//uniform float4 Colors8[365];
-			//uniform float4 Colors9[365];
-=======
-			uniform float4 Colors6[365];
-			// uniform float4 Colors7[365];
-			// uniform float4 Colors8[365];
-			// uniform float4 Colors9[365];
->>>>>>> a65c0369eb9d7203440bc798a2d63f4f1b063aed
-			// uniform float4 Colors10[365];
-			// uniform float4 Colors11[365];
-			// uniform float4 Colors12[365];
+			uniform float4 Colors[365];
 
-<<<<<<< HEAD
 			uniform int days;
 			uniform int shotsPerDay;
-=======
-			uniform int days = 10.0;
-			uniform int shotsPerDay = 1.0;
->>>>>>> a65c0369eb9d7203440bc798a2d63f4f1b063aed
 
 			v2f vert (appdata v)
 			{
@@ -81,21 +54,6 @@
 				return o;
 			}
 
-<<<<<<< HEAD
-			float hash(float n)
-			{
-				return frac(sin(n)*43758.5453);
-			}
-
-			float noise(in float2 x)
-			{
-				float2 p = floor(x);
-				float2 f = frac(x);
-				f = f*f*(3.0 - 2.0*f);
-				float n = p.x + p.y*57.0;
-				return lerp(lerp(hash(n + 0.0), hash(n + 1.0), f.x),
-					lerp(hash(n + 57.0), hash(n + 58.0), f.x), f.y);
-=======
 			// 2D Random
 			float random(in float2 st) {
 				return frac(sin(dot(st.xy,
@@ -125,7 +83,6 @@
 				return lerp(a, b, u.x) +
 					(c - a)* u.y * (1.0 - u.x) +
 					(d - b) * u.x * u.y;
->>>>>>> a65c0369eb9d7203440bc798a2d63f4f1b063aed
 			}
 
 			float map(float value, float low1, float high1, float low2, float high2) 
@@ -133,10 +90,10 @@
 				return low2 + (value - low1) * (high2 - low2) / (high1 - low1);
 			}
 			
-			fixed4 frag (v2f i) : SV_Target
+			fixed4 frag (v2f input) : SV_Target
 			{
 				float4 col = float4(0, 0, 0, 1);
-				float2 uv = i.uv.xy;
+				float2 uv = input.uv.xy;
 				uv.x *= _ScreenParams.x / _ScreenParams.y;
 				float backgroundHue = 0.0 + 0.2*uv.y;
 				float3 color = float3(backgroundHue, backgroundHue, backgroundHue);
@@ -150,34 +107,23 @@
 					float pox = map(sin(float(i)*546.13 + 7.5), -1, 1, 0.2, 6.2);
 					float poy = map(sin(float(i)*321.22 + 4.1), -1, 1, 0.1, 0.9);
 
-<<<<<<< HEAD
-					// buble size, position and color
-					float2  pos = float2(pox, poy);//-1.0 - rad + (2.0 + 2.0*rad)*fmod(pha + 0.1*_Time.y*(0.2 + 0.8*siz), 1.0));
-					float dis = length(uv - pos);
-					float3  col = Colors1[i] * 1.0 / days * days;//lerp(float3(0.94, 0.3, 0.0), float3(0.1, 0.4, 0.8), 0.5 + 0.5*sin(float(i)*1.2 + 1.9));
-=======
 					// bubble size, position and color
 					float2  pos = float2(pox, poy);//-1.0 - rad + (2.0 + 2.0*rad)*fmod(pha + 0.1*_Time.y*(0.2 + 0.8*siz), 1.0));
 					float dis = length(uv - pos);
-					float3  col = Colors1[i];//lerp(float3(0.94, 0.3, 0.0), float3(0.1, 0.4, 0.8), 0.5 + 0.5*sin(float(i)*1.2 + 1.9));
->>>>>>> a65c0369eb9d7203440bc798a2d63f4f1b063aed
-					// col+= 8.0*smoothstep( rad*0.95, rad, dis );
+					float3  col = Colors[i];
 
 					// render
 					float f = length(uv - pos) / rad;
 					float x = fmod(uv.x, 0.2);
 					float y = fmod(uv.y, 0.2);
 
-<<<<<<< HEAD
-					f += noise(uv - (6.5 - uv) + _Time.y * WobbleSpeed);
-=======
 					f += noise(uv - (6.5 - uv) / (size*0.8) + _Time.y * WobbleSpeed);
->>>>>>> a65c0369eb9d7203440bc798a2d63f4f1b063aed
 					f = sqrt(clamp(1.0 - f*f, 0.0, 1.0));
 					color += col.xyz *(1.0 - smoothstep(rad*0.55, rad, dis)) * f;
 				}
 
-				col = float4(color, 1);
+				float2 test = input.uv;
+				col = tex2D(Texture, test);//float4(color, 1);
 				return col;
 			}
 			ENDCG
