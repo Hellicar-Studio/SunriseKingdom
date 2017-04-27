@@ -6,10 +6,12 @@ using UnityEngine.UI;
 
 public class VideoPlayback : MonoBehaviour {
 
+    public float captureTime = 30f;
+    public float captureTimeMax = 60f;
     public EmailThread emailSender;
     public MediaPlayer[] media;
     public Renderer[] rend;
-
+    
     [HideInInspector]
     public float videoLoadTime = 150f;
     [HideInInspector]
@@ -27,11 +29,16 @@ public class VideoPlayback : MonoBehaviour {
 
     //controls
     public Slider playhead;
-    public bool play = false;
+    [HideInInspector]
+    public bool play = true;
+    [HideInInspector]
     public bool stop = false;
+    [HideInInspector]
     public bool pause = false;
 
     private float elapsedTime;
+    private float elapsedTimeCapture;
+    private int captureItem = 0;
     private int item = 1;
     private bool[] isLoaded;
     private float timeExtension = 0f;
@@ -169,32 +176,47 @@ public class VideoPlayback : MonoBehaviour {
             LoadVideo(0, item, VideoRecord.mostRecentRecording);
         }
 
-        // if active, a cycles of saving screenshots and emails occur after recording stops
+        //  capture/email sequence
         if (emailActive)
         {
-            // on first playback capture 1 screenshot for each video at a specific time
-            if (!screenshotTaken && (int)elapsedTime == videoLoadTime + 10)
-            {
-                // when the last email in the list is sent, disable toggle
-                if (itemAdjust(item) == VideoRecord.mostRecentRecording.Length - 1)
-                {
-                    screenshotEmailed = false;
-                }
-
-                StartCoroutine(CaptureScreenshot());
-                screenshotTaken = true;
-            }
-            else if ((int)elapsedTime == videoLoadTime + 11)
-            {
-                screenshotTaken = false;
-            }
-            
             // on first playback, will send an email of all the screenshots
-            // 30 seconds after the last capture is taken
-            if (!screenshotEmailed && !emailSender.emailSent && (int)elapsedTime == videoLoadTime + 30)
+            // when the playhead of the last media in the list is 2.5 seconds before max duration
+            // playhead is in milliseconds
+            if (!screenshotEmailed && !emailSender.emailSent && playhead.value >= playhead.maxValue - 2500)
             {
                 SendEmail();
             }
+            else
+            {
+                elapsedTimeCapture += Time.deltaTime;
+
+                // on first playback capture 1 screenshot for each video at a specific time
+                if (!screenshotTaken && (int)elapsedTimeCapture == captureTime)
+                {
+                    // when the last email in the list is sent, disable toggle
+                    if (itemAdjust(item) == VideoRecord.mostRecentRecording.Length - 1)
+                    {
+                        screenshotEmailed = false;
+                    }
+
+                    StartCoroutine(CaptureScreenshot(captureItem));
+                    captureItem++;
+                    screenshotTaken = true;
+                }
+                else if ((int)elapsedTimeCapture == captureTime + 1)
+                {
+                    screenshotTaken = false;
+                }
+
+                // reset timer
+                if (elapsedTimeCapture >= captureTimeMax)
+                    elapsedTimeCapture = 0f;
+            }
+        }
+        else
+        {
+            elapsedTimeCapture = 0f;
+            captureItem = 0;
         }
     }
 
@@ -262,32 +284,36 @@ public class VideoPlayback : MonoBehaviour {
         return itemCorrected;
     }
 
-    IEnumerator CaptureScreenshot()
+    IEnumerator CaptureScreenshot(int _item)
     {
         screenshotTaken = false;
 
         yield return new WaitForEndOfFrame();
 
-        string path = imageFolder + itemAdjust(item) + ".jpg";
+        string path = imageFolder + _item + ".jpg";
 
         Texture2D img = new Texture2D(Screen.width, Screen.height);
 
-        // get Image from screen
+        // reads the screen pixels and applies to texture
         img.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0);
         img.Apply();
 
-        // convert to JPG
-        byte[] imageBytes = img.EncodeToJPG();
-        System.IO.File.WriteAllBytes(path, imageBytes);
+        // converts texture to JPG and writes to folder path
+        byte[] bytes = img.EncodeToJPG();
+        System.IO.File.WriteAllBytes(path, bytes);
 
         if (debugActive)
-            Debug.Log("Screenshot " + itemAdjust(item) + ".jpg has been saved!");
+            Debug.Log("Screenshot " + _item + ".jpg has been saved!");
     }
 
     private void SendEmail()
     {
-        // send the video file amount to the email sender's attachment array
-        emailSender.videosLength = VideoRecord.mostRecentRecording.Length;
+        //screenshotEmailed = true;
+        //emailActive = false;
+
+        //yield return new WaitForEndOfFrame();
+
+        emailSender.videosLength = captureItem;
         
         if (emailSender.useThreading) emailSender.emailSent = true;
         else emailSender.SendEmail();

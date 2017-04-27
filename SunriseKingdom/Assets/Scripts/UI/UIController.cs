@@ -33,6 +33,8 @@ public class UIController : MonoBehaviour {
     public Text fps;
     public Text recordingStartTime;
     public Text recordingStopTime;
+    public Text captureTime;
+    public Text captureTimeMax;
 
     [Header("Input Fields")]
     public InputField _apiKey;
@@ -49,6 +51,8 @@ public class UIController : MonoBehaviour {
     public InputField _serverSMTP;
     public InputField _portSMTP;
     public InputField _emailRecipient;
+    public InputField _captureTime;
+    public InputField _captureTimeMax;
 
     [Header("Toggles")]
     public Toggle _debugActive;
@@ -85,6 +89,8 @@ public class UIController : MonoBehaviour {
         _imageFolder.text = "D:\\SunriseData/Images/";
         _videoFolder.text = "D:\\SunriseData/Videos/";
         _videoLoadTime.text = "150";
+        _captureTime.text = "30";
+        _captureTimeMax.text = "60";
 
         // recording settings
         _cameraIP.text = "192.168.1.201";
@@ -125,6 +131,8 @@ public class UIController : MonoBehaviour {
         _imageFolder.text = PlayerPrefs.GetString("imageFolder");
         _videoFolder.text = PlayerPrefs.GetString("videoFolder");
         _videoLoadTime.text = PlayerPrefs.GetString("videoLoadTime");
+        _captureTime.text = PlayerPrefs.GetString("captureTime");
+        _captureTimeMax.text = PlayerPrefs.GetString("captureTimeMax");
 
         // recording settings
         _cameraIP.text = PlayerPrefs.GetString("cameraIP");
@@ -155,6 +163,8 @@ public class UIController : MonoBehaviour {
         PlayerPrefs.SetString("imageFolder", _imageFolder.text);
         PlayerPrefs.SetString("videoFolder", _videoFolder.text);
         PlayerPrefs.SetString("videoLoadTime", _videoLoadTime.text);
+        PlayerPrefs.SetString("captureTime", _captureTime.text);
+        PlayerPrefs.SetString("captureTimeMax", _captureTimeMax.text);
 
         // recording settings
         PlayerPrefs.SetString("cameraIP", _cameraIP.text);

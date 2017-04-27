@@ -94,6 +94,21 @@ public class GameController : MonoBehaviour
         else
             videoPlayback.videoLoadTime = 150; // default value
 
+        // capture settings
+        float captureTime;
+        float.TryParse(uiSettings._captureTime.text, out captureTime);
+        if (parsed)
+            videoPlayback.captureTime = captureTime;
+        else
+            videoPlayback.captureTime = 30f; // default value
+
+        float captureTimeMax;
+        float.TryParse(uiSettings._captureTimeMax.text, out captureTimeMax);
+        if (parsed)
+            videoPlayback.captureTimeMax = captureTimeMax;
+        else
+            videoPlayback.captureTimeMax = 60f; // default value
+
         // setup video recorder variables
         videoRecord.CamIP = uiSettings._cameraIP.text;
         videoRecord.recordingsRoot = uiSettings._videoFolder.text;
@@ -139,6 +154,8 @@ public class GameController : MonoBehaviour
         uiSettings.imageFolder.text = "Image Folder: " + videoPlayback.imageFolder;
         uiSettings.videoFolder.text = "Video Folder: " + videoPlayback.videoFolder;
         uiSettings.videoLoadTime.text = "Video Load Time: " + videoPlayback.videoLoadTime.ToString();
+        uiSettings.captureTime.text = "Capture Time: " + videoPlayback.captureTime.ToString();
+        uiSettings.captureTimeMax.text = "Capture Time Max: " + videoPlayback.captureTimeMax.ToString();
 
         // email sender
         uiSettings.emailAccount.text = "Account: " + emailSender.emailAccount;
