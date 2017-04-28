@@ -95,14 +95,14 @@
 				float4 col = float4(0, 0, 0, 1);
 				float2 uv = input.uv.xy;
 				uv.x *= _ScreenParams.x / _ScreenParams.y;
-				float backgroundHue = 0.0 + 0.2*uv.y;
+				float backgroundHue = 0.0;// +0.2*uv.y;
 				float3 color = float3(backgroundHue, backgroundHue, backgroundHue);
 
 				// bubbles
 				for (int i = 0; i<days; i++)
 				{
 					// bubble seeds
-					float rad = min(_Time.y * Speed - (float)i/10.0, size);//siz;
+					float rad = min(_Time.y * Speed - (float)i/10.0, size) * size;//siz;
 					if (rad < 0) rad = 0;
 					float pox = map(sin(float(i)*546.13 + 7.5), -1, 1, 0.2, 6.2);
 					float poy = map(sin(float(i)*321.22 + 4.1), -1, 1, 0.1, 0.9);
@@ -119,7 +119,25 @@
 
 					f += noise(uv - (6.5 - uv) / (size*0.8) + _Time.y * WobbleSpeed);
 					f = sqrt(clamp(1.0 - f*f, 0.0, 1.0));
-					color += col.xyz *(1.0 - smoothstep(rad*0.55, rad, dis)) * f;
+					color += col.xyz * (1.0 - smoothstep(rad*0.55, rad, dis)) * f;
+
+					int numR = color.r;
+					int numG = color.g;
+					int numB = color.b;
+
+					float percentR = frac(color.r);
+					float percentG = frac(color.g);
+					float percentB = frac(color.b);
+
+					if (fmod(numR, 2) == 1) {
+						color.r = 1.0 - percentR;
+					}
+					if (fmod(numG, 2) == 1) {
+						color.g = 1.0 - percentG;
+					}
+					if (fmod(numB, 2) == 1) {
+						color.b = 1.0 - percentB;
+					}
 				}
 
 				//float2 test = input.uv;

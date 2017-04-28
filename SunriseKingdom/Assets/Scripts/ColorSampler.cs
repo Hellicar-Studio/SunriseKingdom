@@ -53,7 +53,7 @@ public class ColorSampler : MonoBehaviour {
     {
         for(int i = 0; i < colors.Length; i++)
         {
-            colors[i] = new Color(1, 1, 1);
+            colors[i] = new Color(0, 0, 0);
         }
         currentDay = 0;
         saveSettings();
