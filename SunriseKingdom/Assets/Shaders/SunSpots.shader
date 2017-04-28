@@ -122,8 +122,8 @@
 					color += col.xyz *(1.0 - smoothstep(rad*0.55, rad, dis)) * f;
 				}
 
-				float2 test = input.uv;
-				col = tex2D(Texture, test);//float4(color, 1);
+				//float2 test = input.uv;
+				col = float4(color, 1);
 				return col;
 			}
 			ENDCG

@@ -45,10 +45,10 @@ public class VisualisationController : MonoBehaviour {
 
         for (int j = 0; j < colors.Length; j++)
         {
-            colors[j] = Color.black;//new Color(Random.Range(RMin, RMax), Random.Range(GMin, GMax), Random.Range(BMin, BMax), 1);
+            colors[j] = new Color(Random.Range(RMin, RMax), Random.Range(GMin, GMax), Random.Range(BMin, BMax), 1);
         }
 
-        StartCoroutine(appendNewColors());
+        //StartCoroutine(appendNewColors());
     }
 
     public IEnumerator appendNewColors()
@@ -105,7 +105,7 @@ public class VisualisationController : MonoBehaviour {
             mat.SetColorArray(uniformArrayName, colors);
         }
         mat.SetInt("days", days);
-        mat.SetFloat("size", map(days, 1, 365, 1, 0));
+        //mat.SetFloat("size", map(days, 1, 365, 1, 0));
         mat.SetTexture("Texture", tex);
 
         Graphics.Blit(source, destination, mat);

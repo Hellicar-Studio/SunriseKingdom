@@ -159,6 +159,7 @@
     <None Include="Assets\Shaders\SunLife.shader" />
     <None Include="Assets\Shaders\SunPaint.shader" />
     <None Include="Assets\Shaders\SunSpots.shader" />
+    <None Include="Assets\Shaders\VisualizationColorRemap.shader" />
     <None Include="Assets\Standard Assets\Effects\ImageEffects\Shaders\ColorCorrection3DLut.shader" />
     <None Include="Assets\Standard Assets\Effects\ImageEffects\Shaders\ColorCorrectionCurves.shader" />
     <None Include="Assets\Standard Assets\Effects\ImageEffects\Shaders\ColorCorrectionCurvesSimple.shader" />

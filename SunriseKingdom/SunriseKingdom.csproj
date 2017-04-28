@@ -117,8 +117,11 @@
     <Compile Include="Assets\AVProVideo\Scripts\Internal\OSXMediaPlayer.cs" />
     <Compile Include="Assets\AVProVideo\Scripts\Internal\WebGLMediaPlayer.cs" />
     <Compile Include="Assets\AVProVideo\Scripts\Internal\WindowsMediaPlayer.cs" />
+    <Compile Include="Assets\Scripts\ColorSampler.cs" />
     <Compile Include="Assets\Scripts\EmailThread.cs" />
     <Compile Include="Assets\Scripts\GameController.cs" />
+    <Compile Include="Assets\Scripts\PlayerPrefsX.cs" />
+    <Compile Include="Assets\Scripts\PostProcessingEffect.cs" />
     <Compile Include="Assets\Scripts\SunriseController.cs" />
     <Compile Include="Assets\Scripts\UI\UIController.cs" />
     <Compile Include="Assets\Scripts\UI\UIMouseDown.cs" />
@@ -155,6 +158,7 @@
     <None Include="Assets\Shaders\SunLife.shader" />
     <None Include="Assets\Shaders\SunPaint.shader" />
     <None Include="Assets\Shaders\SunSpots.shader" />
+    <None Include="Assets\Shaders\VisualizationColorRemap.shader" />
     <None Include="Assets\Standard Assets\Effects\ImageEffects\Shaders\ColorCorrection3DLut.shader" />
     <None Include="Assets\Standard Assets\Effects\ImageEffects\Shaders\ColorCorrectionCurves.shader" />
     <None Include="Assets\Standard Assets\Effects\ImageEffects\Shaders\ColorCorrectionCurvesSimple.shader" />

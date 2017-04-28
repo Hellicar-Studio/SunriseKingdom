@@ -11,6 +11,7 @@ public class VideoPlayback : MonoBehaviour {
     public EmailThread emailSender;
     public MediaPlayer[] media;
     public Renderer[] rend;
+    public ColorSampler sampler;
     
     [HideInInspector]
     public float videoLoadTime = 150f;
@@ -298,6 +299,17 @@ public class VideoPlayback : MonoBehaviour {
         img.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0);
         img.Apply();
 
+        if(_item == (VideoRecord.mostRecentRecording.Length * 300) / captureTimeMax / 2)
+        {
+            Color col = sampler.saveNewColor(img);
+            Debug.Log("Color saved at Item: " + _item + " was: " + col);
+            int r = (int)(col.r * 255);
+            int g = (int)(col.g * 255);
+            int b = (int)(col.b * 255);
+            string hex = r.ToString("X2") + g.ToString("X2") + b.ToString("X2");
+            Debug.Log("That's Hex String: " + hex);
+            sampler.newestColorHex = hex;
+        }
         // converts texture to JPG and writes to folder path
         byte[] bytes = img.EncodeToJPG();
         System.IO.File.WriteAllBytes(path, bytes);

@@ -13,6 +13,7 @@ public class GameController : MonoBehaviour
     public VideoRecord videoRecord;
     public EmailThread emailSender;
     public Transform playbackTransform;
+    public ColorSampler sampler;
     [Header("Support")]
     public bool manualRecord = false;
     public bool runFirstRun = false;
@@ -57,6 +58,10 @@ public class GameController : MonoBehaviour
             // load in saved settings
             uiSettings.LoadSettings();
         }
+
+        // Find the color sampler if there isn't one.
+        if (!sampler)
+            sampler = FindObjectOfType<ColorSampler>();
 
         // updates system variables
         UpdateSystemSettings();
@@ -381,11 +386,12 @@ public class GameController : MonoBehaviour
         // updates email message body
         if (!videoPlayback.screenshotEmailed)
         {
-            // gather system data to send along
+            // gather system data to send along as well as the color for today
             string msg = "System Date: " + uiSettings.currentDate.text + "\n" +
                 "Sunrise Time: " + uiSettings.sunriseTimeCur.text + "\n" +
                 "Recording Start Time: " + uiSettings.recordingStartTime.text + "\n" +
-                "Recording Stop Time: " + uiSettings.recordingStopTime.text;
+                "Recording Stop Time: " + uiSettings.recordingStopTime.text + "\n" +
+                "Color For the Day: #" + sampler.newestColorHex;
             
             emailSender.messageBody = msg;
         }
