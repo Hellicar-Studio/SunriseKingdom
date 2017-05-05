@@ -6,8 +6,6 @@ public class VisualisationController : MonoBehaviour {
 
     public Material mat;
     ColorSampler sampler;
-    [Range(0, 364)]
-    public int days;
 
     Texture2D tex;
 
@@ -48,12 +46,7 @@ public class VisualisationController : MonoBehaviour {
     private void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
         mat.SetColorArray("Colors", sampler.colors);
-        for(int i = 0; i < 4; i++)
-        {
-            Debug.Log(sampler.colors[i]);
-        }
-        mat.SetInt("days", days);
-        //mat.SetFloat("size", map(days, 1, 365, 1, 0));
+        mat.SetFloatArray("Times", sampler.times);
         mat.SetTexture("Texture", tex);
 
         Graphics.Blit(source, destination, mat);

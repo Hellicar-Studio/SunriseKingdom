@@ -21,26 +21,50 @@ public class ColorSampler : MonoBehaviour {
 
     public string colorsKey = "SunriseColors";
     public string currentDayKey = "CurrentDay";
+    public string timeKey = "SunriseTimes";
 
-    [HideInInspector]
+    //[HideInInspector]
     public Color[] colors;
+    //[HideInInspector]
+    public float[] times;
 
-	// Use this for initialization
-	void Start () {
+    // Use this for initialization
+    void Start () {
         ResetColorsButton = false;
         colors = new Color[365];
+        times = new float[365];
         colors = PlayerPrefsX.GetColorArray(colorsKey);
+        times = PlayerPrefsX.GetFloatArray(timeKey);
         currentDay = PlayerPrefs.GetInt(currentDayKey);
         Debug.Log("Colors After Load" + colors[0]);
 
         if (!cam)
             cam = FindObjectOfType<Camera>();
 
-        printColors();
+        //printColors();
+
+        //float bonus = 0.1f;
+
+        //float RMin = 0.7f + bonus;
+        //float RMax = 0.9f + bonus;
+        //float GMin = 0.32f + bonus;
+        //float GMax = 0.6f + bonus;
+        //float BMin = 0.0f + bonus;
+        //float BMax = 0.39f + bonus;
+
+        //for (int j = 0; j < colors.Length; j++)
+        //{
+        //    colors[j] = new Color(Random.Range(RMin, RMax), Random.Range(GMin, GMax), Random.Range(BMin, BMax), 1);
+        //}
+
+        //for (int i = 0; i < times.Length; i++)
+        //{
+        //    times[i] = Random.Range(240, 375);
+        //}
     }
 
     // Print all the filled colors so far
-     public void printColors()
+    public void printColors()
     {
         for(int i = 0; i < currentDay; i++)
         {
@@ -55,8 +79,13 @@ public class ColorSampler : MonoBehaviour {
         {
             colors[i] = new Color(0, 0, 0);
         }
+        for (int i = 0; i < times.Length; i++)
+        {
+            times[i] = 0;
+        }
         currentDay = 0;
         saveSettings();
+        loadSettings();
     }
 
     // Wrapper method for saving a new color
@@ -73,11 +102,55 @@ public class ColorSampler : MonoBehaviour {
         return col;
     }
 
+    public void saveSunriseTime(string sunriseTime)
+    {
+        string[] splitTime = sunriseTime.Split(':');
+        int hours = 0;
+        if(splitTime.Length > 1)
+        {
+            bool parsed = int.TryParse(splitTime[0], out hours);
+            if (!parsed)
+            {
+                Debug.Log("Failed to Parse hours! setting to default value: 0");
+                hours = 0;
+            } else
+            {
+                hours *= 60;
+            }
+            int minutes = 0;
+            parsed = int.TryParse(splitTime[1], out minutes);
+            if (!parsed)
+            {
+                Debug.Log("Failed to Parse minutes! setting to default value: 0");
+                minutes = 0;
+            }
+            else
+            {
+                times[currentDay] = hours + minutes;
+                saveSettings();
+            }
+        } else
+        {
+            Debug.Log("save Sunrise Time did not get a good time!");
+        }
+    }
+
+
     // Save the color array and the currentDay value to the Player Prefs
     public bool saveSettings()
     {
         PlayerPrefs.SetInt(currentDayKey, currentDay);
-        return PlayerPrefsX.SetColorArray(colorsKey, colors);
+        bool savedTimes = PlayerPrefsX.SetFloatArray(timeKey, times);
+        bool savedColors = PlayerPrefsX.SetColorArray(colorsKey, colors);
+        return (savedTimes && savedColors);
+    }
+
+    // Load the color array and the currentDay value to the Player Prefs
+    public void loadSettings()
+    {
+        currentDay = PlayerPrefs.GetInt(currentDayKey, 0);
+        times = PlayerPrefsX.GetFloatArray(timeKey);
+        colors = PlayerPrefsX.GetColorArray(colorsKey);
     }
 
     // Find the Next Color

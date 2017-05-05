@@ -14,6 +14,7 @@ public class GameController : MonoBehaviour
     public EmailThread emailSender;
     public Transform playbackTransform;
     public ColorSampler sampler;
+    public VisualisationController visController;
     [Header("Support")]
     public bool manualRecord = false;
     public bool runFirstRun = false;
@@ -284,9 +285,12 @@ public class GameController : MonoBehaviour
     private void SunSystem()
     {
         // check for latest sunrise at the specified time
+        //Debug.Log("Local Time: " + sunrise.GetLocalTime());
+        //Debug.Log("Time To check: " + uiSettings._sunriseTimeCheck.text);
         if (sunrise.GetLocalTime() == uiSettings._sunriseTimeCheck.text)
         {
             sunrise.GetSunriseTime();
+            sampler.saveSunriseTime(sunrise.sunriseTime);
         }
         else
         {
@@ -350,6 +354,7 @@ public class GameController : MonoBehaviour
             {
                 uiSettings.recordingStartTime.text = "Recording Start: " + sunrise.GetLocalTime();
                 videoRecord.StartRecording();
+                visController.enabled = true;
             }
         }
         else
@@ -359,6 +364,7 @@ public class GameController : MonoBehaviour
                 uiSettings.recordingStopTime.text = "Recording Stop: " + sunrise.GetLocalTime();
                 videoPlayback.emailActive = true;
                 videoRecord.StopRecording();
+                visController.enabled = false;
             }
         }
     }

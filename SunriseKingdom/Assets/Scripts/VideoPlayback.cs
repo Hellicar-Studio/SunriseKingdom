@@ -299,7 +299,7 @@ public class VideoPlayback : MonoBehaviour {
         img.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0);
         img.Apply();
 
-        if(_item == (VideoRecord.mostRecentRecording.Length * 300) / captureTimeMax / 2)
+        if(_item == (int)(VideoRecord.mostRecentRecording.Length * 300) / captureTimeMax / 2)
         {
             Color col = sampler.saveNewColor(img);
             Debug.Log("Color saved at Item: " + _item + " was: " + col);

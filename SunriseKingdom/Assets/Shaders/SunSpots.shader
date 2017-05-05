@@ -4,9 +4,10 @@
 	{
 		XOffset("X Offset", Range(0.0, 6.5)) = 0.0
 		YOffset("X Offset", Range(0.0, 1.0)) = 0.0
-		size("Size", Range(0.0, 1.0)) = 0.01
 		Speed("Speed", Range(0.001, 1.0)) = 1.0
 		WobbleSpeed("Wobble Speed", Range(0.0, 1.0)) = 0.0
+		MinSize("Minimum Size", Range(0.0, 6.5)) = 0.0
+		MaxSize("Maximum Size", Range(0.0, 6.5)) = 6.5
 	}
 	SubShader
 	{
@@ -36,12 +37,15 @@
 				float4 vertex : SV_POSITION;
 			};
 
-			uniform float size;
 			uniform float Speed;
 			uniform float WobbleSpeed;
 			uniform sampler2D Texture;
+			uniform float MinSize;
+			uniform float MaxSize;
 
 			uniform float4 Colors[365];
+			// Min 240 for longest day - Max 375 for shortest Day 
+			uniform float Times[365];
 
 			uniform int days;
 			uniform int shotsPerDay;
@@ -79,7 +83,7 @@
 				float2 u = f*f*(3.0 - 2.0*f);
 				// u = smoothstep(0.,1.,f);
 
-				// Mix 4 coorners porcentages
+				// Mix 4 coorners percentages
 				return lerp(a, b, u.x) +
 					(c - a)* u.y * (1.0 - u.x) +
 					(d - b) * u.x * u.y;
@@ -88,6 +92,18 @@
 			float map(float value, float low1, float high1, float low2, float high2) 
 			{
 				return low2 + (value - low1) * (high2 - low2) / (high1 - low1);
+			}
+
+			float map(float value, float low1, float high1, float low2, float high2, bool isClamped)
+			{
+				float val = low2 + (value - low1) * (high2 - low2) / (high1 - low1);
+				if (isClamped) {
+					if (val < low2)
+						return low2;
+					if (val > high2)
+						return high2;
+				}
+				return val;
 			}
 			
 			fixed4 frag (v2f input) : SV_Target
@@ -99,8 +115,9 @@
 				float3 color = float3(backgroundHue, backgroundHue, backgroundHue);
 
 				// bubbles
-				for (int i = 0; i<days; i++)
+				for (int i = 0; i<365; i++)
 				{
+					float size = (Times[i] == 0) ? 0 : map(Times[i], 375, 240, MinSize, MaxSize, true);
 					// bubble seeds
 					float rad = min(_Time.y * Speed - (float)i/10.0, size) * size;//siz;
 					if (rad < 0) rad = 0;
@@ -117,9 +134,11 @@
 					float x = fmod(uv.x, 0.2);
 					float y = fmod(uv.y, 0.2);
 
-					f += noise(uv - (6.5 - uv) / (size*0.8) + _Time.y * WobbleSpeed);
+					f += noise(uv - (6.5 - uv) / (size*0.4) + _Time.y * WobbleSpeed);
 					f = sqrt(clamp(1.0 - f*f, 0.0, 1.0));
-					color += col.xyz * (1.0 - smoothstep(rad*0.55, rad, dis)) * f;
+					if (col.x != 1.0) {
+						color += col.xyz * (1.0 - smoothstep(rad*-0.5, rad, dis)) * f;
+					}
 
 					int numR = color.r;
 					int numG = color.g;

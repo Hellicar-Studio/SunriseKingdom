@@ -29,6 +29,7 @@ public class SunriseController : MonoBehaviour {
     public bool isActive = false;
     [HideInInspector]
     public bool debugActive = false;
+    //[HideInInspector]
 
     private int utcTime;
     private string URL1 = "http://api.openweathermap.org/data/2.5/weather?q=";

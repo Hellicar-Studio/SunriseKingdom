@@ -128,6 +128,7 @@
     <Compile Include="Assets\Scripts\VideoPlayback.cs" />
     <Compile Include="Assets\Scripts\VideoRecord.cs" />
     <Compile Include="Assets\Scripts\VisualisationController.cs" />
+    <Compile Include="Assets\TimeSampler.cs" />
     <Compile Include="Assets\texture\ApplyShader.cs" />
     <Compile Include="Assets\texture\DrawMouse.cs" />
   </ItemGroup>
