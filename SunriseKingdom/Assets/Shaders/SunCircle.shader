@@ -1,34 +1,59 @@
-﻿Shader "Custom/SunSpots"
+﻿Shader "Custom/SunCircle"
 {
 	Properties
 	{
 		XOffset("X Offset", Range(0.0, 6.5)) = 0.0
 		YOffset("X Offset", Range(0.0, 1.0)) = 0.0
-		Speed("Speed", Range(0.001, 1.0)) = 1.0
-		WobbleSpeed("Wobble Speed", Range(0.0, 1.0)) = 0.0
+		Speed("Speed", Range(1.0, 100.0)) = 1.0
 		MinSize("Minimum Size", Range(0.0, 6.5)) = 0.0
 		MaxSize("Maximum Size", Range(0.0, 6.5)) = 6.5
 	}
 	SubShader
 	{
+		Tags { "RenderType"="Opaque" }
+		LOD 100
+
 		Pass
 		{
 			CGPROGRAM
-			#pragma vertex vert_img
+			#pragma vertex vert
 			#pragma fragment frag
-			#pragma target 3.0
+			// make fog work
+			#pragma multi_compile_fog
 			
 			#include "UnityCG.cginc"
 
+			struct appdata
+			{
+				float4 vertex : POSITION;
+				float2 uv : TEXCOORD0;
+			};
+
+			struct v2f
+			{
+				float2 uv : TEXCOORD0;
+				UNITY_FOG_COORDS(1)
+				float4 vertex : SV_POSITION;
+			};
+
 			uniform float Speed;
-			uniform float WobbleSpeed;
-			uniform float Time;
-			// Min 240 for longest day - Max 375 for shortest Day 
 			uniform float MinSize;
 			uniform float MaxSize;
 
 			uniform float4 Colors[365];
+			// Min 240 for longest day - Max 375 for shortest Day 
 			uniform float Times[365];
+
+			uniform int days;
+			uniform int shotsPerDay;
+
+			v2f vert (appdata v)
+			{
+				v2f o;
+				o.vertex = UnityObjectToClipPos(v.vertex);
+				o.uv = v.uv;
+				return o;
+			}
 
 			// 2D Random
 			float random(in float2 st) {
@@ -77,30 +102,50 @@
 				}
 				return val;
 			}
+			
+			fixed4 frag (v2f input) : SV_Target
+			{
+				float4 col = float4(0, 0, 0, 1);
+				float2 uv = input.uv.xy;
+				uv.x *= _ScreenParams.x / _ScreenParams.y;
+				float backgroundHue = 1.0;//0.7+0.4*uv.y;
+				float3 color = float3(backgroundHue, backgroundHue, backgroundHue);
 
-			float3 calculateColor(float3 color, float2 uv) {
-				for (int i = 0; i < 12; i++)
+				float2 uvV;
+				uvV.y = uv.y *(1.1 - (uv.y + 0.1));   // vec2(1.0)- uv.yx; -> 1.-u.yx; Thanks FabriceNeyret !
+				uvV.x = uv.x *(6.4 - uv.x);   // vec2(1.0)- uv.yx; -> 1.-u.yx; Thanks FabriceNeyret !
+
+				float vig = uvV.x*uvV.y * 15.0; // multiply with sth for intensity
+
+				vig = pow(vig, 0.7); // change pow for modifying the extend of the vignette
+
+				bool done = false;
+				// bubbles
+				for (int i = 0; i < 365; i++)
 				{
 					// bubble seeds
-					float size = map(Times[i], 375, 240, MinSize, MaxSize, true);
-					float rad = min(Time * Speed - (float)i / 10.0, size) * size;//siz;
-					rad = max(rad, 0.0);
-					float pox = map(sin(float(i)*546.13 + 7.5), -1, 1, 0.3, 6.2);
-					float poy = map(sin(float(i)*321.22 + 4.1), -1, 1, 0.2, 0.9);
+					float rad = map(_Time.y * Speed - float(i), 0.0, 3600, 0.0, 6.5);//siz;
+					float pox = map(rad, 0, 6.5, 6.0, 0.0);
+
+					float poy = 0.5;//map(sin(float(i)*321.22 + 4.1), -1, 1, 0.2, 0.9);
 
 					// bubble size, position and color
-					float2  pos = float2(pox, poy);//-1.0 - rad + (2.0 + 2.0*rad)*fmod(pha + 0.1*Time*(0.2 + 0.8*siz), 1.0));
-					float dis = length(uv - pos) / 2;
-					float3  col = float3(1.0, 1.0, 1.0) - Colors[i];
+					float2  pos = float2(pox, poy);//-1.0 - rad + (2.0 + 2.0*rad)*fmod(pha + 0.1*_Time.y*(0.2 + 0.8*siz), 1.0));
+					float dis = length(uv - pos);
+					float3  col = Colors[i];
+					//col -= map(pox, 0.0, 6.5, 0.5, 0.0);
 
 					// render
 					float f = length(uv - pos) / rad;
+					float x = fmod(uv.x, 0.2);
+					float y = fmod(uv.y, 0.2);
 
-					f += noise(uv - (6.5 - uv) / (size*0.4) + Time * WobbleSpeed);
+					//f += noise(uv - (6.5 - uv) / (size*0.4) + _Time.y);
 					f = sqrt(clamp(1.0 - f*f, 0.0, 1.0));
-					//if (col.x != 1.0) {
-					color -= col.xyz * (1.0 - smoothstep(rad*-0.5, rad, dis)) * f;
-					//}
+					if (col.x != 1.0) {
+						float3 newCol = col.xyz * (1.0 - smoothstep(rad*-0.5, rad, dis)) * f;
+						color = lerp(color, newCol, 0.5);
+					}
 
 					//int numR = color.r;
 					//int numG = color.g;
@@ -120,30 +165,14 @@
 					//	color.b = 1.0 - percentB;
 					//}
 				}
-				return color;
-			}
-			
-			fixed4 frag (v2f_img input) : SV_Target
-			{
-				float4 col = float4(0, 0, 0, 1);
-				float2 uv = input.uv.xy;
-				uv.x *= _ScreenParams.x / _ScreenParams.y;
-				//float backgroundHue = 1.0;//0.7+0.4*uv.y;
-				float3 color = float3(1.0, 1.0, 1.0);
 
-				float2 uvV;
-				uvV.y = uv.y *(1.1 - (uv.y + 0.1));   // vec2(1.0)- uv.yx; -> 1.-u.yx; Thanks FabriceNeyret !
-				uvV.x = uv.x *(6.4 - uv.x);   // vec2(1.0)- uv.yx; -> 1.-u.yx; Thanks FabriceNeyret !
-
-
-				float vig = uvV.x*uvV.y * 15.0; // multiply with sth for intensity
-
-				vig = pow(vig, 0.7); // change pow for modifying the extend of the vignette
-
-				// bubbles
-				color = calculateColor(color, uv);
-
+				//float2 test = input.uv;
+				//vig = max(vig, 0.0);
+				//vig = 1.0 - vig;
+				//if (vig < 0.0)
+				//	vig = 0.0;
 				col = float4(color, 1);
+				//col += float4( vig, vig, vig, 0);
 				return col;
 			}
 			ENDCG

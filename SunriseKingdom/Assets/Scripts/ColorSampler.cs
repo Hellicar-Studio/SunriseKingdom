@@ -31,15 +31,32 @@ public class ColorSampler : MonoBehaviour {
     // Use this for initialization
     void Start () {
         ResetColorsButton = false;
-        colors = new Color[365];
-        times = new float[365];
         colors = PlayerPrefsX.GetColorArray(colorsKey);
         times = PlayerPrefsX.GetFloatArray(timeKey);
         currentDay = PlayerPrefs.GetInt(currentDayKey);
-        Debug.Log("Colors After Load" + colors[0]);
 
         if (!cam)
             cam = FindObjectOfType<Camera>();
+
+        if (colors.Length < 1 || times.Length < 1)
+        {
+            Debug.Log("Initializing Colors!");
+            colors = new Color[365];
+            times = new float[365];
+            for (int i = 0; i < 365; i++)
+            {
+                colors[i] = new Color(0, 0, 0);
+                times[i] = 0;
+            }
+            currentDay = 0;
+            PlayerPrefsX.SetColorArray(colorsKey, colors);
+            PlayerPrefsX.SetFloatArray(timeKey, times);
+            PlayerPrefs.SetInt(currentDayKey, 0);
+        }
+
+        //printColors();
+
+        //visController.enabled = false;
 
         //printColors();
 
@@ -54,7 +71,10 @@ public class ColorSampler : MonoBehaviour {
 
         //for (int j = 0; j < colors.Length; j++)
         //{
-        //    colors[j] = new Color(Random.Range(RMin, RMax), Random.Range(GMin, GMax), Random.Range(BMin, BMax), 1);
+        //    if(j%2 == 0)
+        //        colors[j] = new Color(Random.Range(RMin, RMax), Random.Range(GMin, GMax), Random.Range(BMin, BMax), 1);
+        //    else
+        //        colors[j] = new Color(Random.Range(1-RMin, 1-RMax), Random.Range(1-GMin, 1-GMax), Random.Range(1-BMin, 1-BMax), 1);
         //}
 
         //for (int i = 0; i < times.Length; i++)
@@ -66,9 +86,13 @@ public class ColorSampler : MonoBehaviour {
     // Print all the filled colors so far
     public void printColors()
     {
-        for(int i = 0; i < currentDay; i++)
+        for(int i = 0; i < colors.Length; i++)
         {
             Debug.Log("Day: " + i + " " + colors[i]);
+        }
+        for(int i = 0; i < times.Length; i++)
+        {
+            Debug.Log("Time: " + i + " " + times[i]);
         }
     }
 

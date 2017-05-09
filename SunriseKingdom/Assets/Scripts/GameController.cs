@@ -354,7 +354,7 @@ public class GameController : MonoBehaviour
             {
                 uiSettings.recordingStartTime.text = "Recording Start: " + sunrise.GetLocalTime();
                 videoRecord.StartRecording();
-                visController.enabled = true;
+                visController.startDrawing();
             }
         }
         else
@@ -364,7 +364,7 @@ public class GameController : MonoBehaviour
                 uiSettings.recordingStopTime.text = "Recording Stop: " + sunrise.GetLocalTime();
                 videoPlayback.emailActive = true;
                 videoRecord.StopRecording();
-                visController.enabled = false;
+                visController.stopDrawing();
             }
         }
     }

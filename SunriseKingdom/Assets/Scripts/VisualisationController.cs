@@ -6,6 +6,8 @@ public class VisualisationController : MonoBehaviour {
 
     public Material mat;
     ColorSampler sampler;
+    public bool drawing;
+    float time;
 
     Texture2D tex;
 
@@ -20,6 +22,9 @@ public class VisualisationController : MonoBehaviour {
 
         if (!sampler)
             sampler = FindObjectOfType<ColorSampler>();
+
+        drawing = false;
+        time = 0;
         //colors = new Color[365];
         //float bonus = 0.1f;
 
@@ -40,15 +45,37 @@ public class VisualisationController : MonoBehaviour {
 
     // Update is called once per frame
     void Update () {
+        if(drawing)
+        {
+            time += Time.deltaTime;
+        }
+    }
 
+    public void startDrawing()
+    {
+        drawing = true;
+        time = 0;
+    }
+
+    public void stopDrawing()
+    {
+        drawing = false;
+        time = 0;
     }
 
     private void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
-        mat.SetColorArray("Colors", sampler.colors);
-        mat.SetFloatArray("Times", sampler.times);
-        mat.SetTexture("Texture", tex);
+        if(drawing)
+        {
+            mat.SetColorArray("Colors", sampler.colors);
+            mat.SetFloatArray("Times", sampler.times);
+            mat.SetFloat("Time", time);
 
-        Graphics.Blit(source, destination, mat);
+            Graphics.Blit(source, destination, mat);
+        }
+        else
+        {
+            Graphics.Blit(source, destination);
+        }
     }
 }
