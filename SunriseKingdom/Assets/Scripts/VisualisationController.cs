@@ -51,6 +51,23 @@ public class VisualisationController : MonoBehaviour {
         }
     }
 
+    public void setDrawingState(bool state)
+    {
+        Debug.Log("Clicked!");
+        if(state)
+        {
+            Debug.Log("Trying to turn on visualization");
+                Debug.Log("Turned on visualization!");
+                startDrawing();
+        } else
+        {
+            Debug.Log("Trying to turn off visualization");
+                Debug.Log("Turned off visualization");
+                stopDrawing();
+        }
+
+    }
+
     public void startDrawing()
     {
         drawing = true;

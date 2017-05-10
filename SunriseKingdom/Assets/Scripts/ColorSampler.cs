@@ -45,7 +45,7 @@ public class ColorSampler : MonoBehaviour {
             times = new float[365];
             for (int i = 0; i < 365; i++)
             {
-                colors[i] = new Color(0, 0, 0);
+                colors[i] = new Color(1, 1, 1);
                 times[i] = 0;
             }
             currentDay = 0;
@@ -101,7 +101,7 @@ public class ColorSampler : MonoBehaviour {
     {
         for(int i = 0; i < colors.Length; i++)
         {
-            colors[i] = new Color(0, 0, 0);
+            colors[i] = new Color(1, 1, 1);
         }
         for (int i = 0; i < times.Length; i++)
         {
