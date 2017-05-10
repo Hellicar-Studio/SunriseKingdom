@@ -115,6 +115,8 @@ public class ColorSampler : MonoBehaviour {
     // Wrapper method for saving a new color
     public Color saveNewColor(Texture2D tex)
     {
+        if (currentDay == 365)
+            resetAll();
         Debug.Log("Saved Starting!");
         Color col = getNewColor(tex);
         colors[currentDay] = col;
