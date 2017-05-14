@@ -85,8 +85,17 @@ public class EmailThread : MonoBehaviour
         for (int i = 0; i < videosLength; i++)
         {
             string attachmentPath = imagesFolder + i + ".jpg";
-            Attachment attachment = new Attachment(attachmentPath);
-            mail.Attachments.Add(attachment);
+            try
+            {
+                Attachment attachment = new Attachment(attachmentPath);
+                Debug.Log("Attached screenshot " + i.ToString());
+                mail.Attachments.Add(attachment);
+            }
+            catch
+            {
+                Debug.Log("Missing screenshot " + i.ToString());
+            }
+
         }
 
         // establishes a connection to the outgoing server (SMTP) and sends the email
@@ -97,7 +106,7 @@ public class EmailThread : MonoBehaviour
         ServicePointManager.ServerCertificateValidationCallback =
             delegate (object s, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
             { return true; };
-        server.SendAsync(mail, "Sending Email");
+        server.Send(mail);
     }
 
     // kills thread on exit

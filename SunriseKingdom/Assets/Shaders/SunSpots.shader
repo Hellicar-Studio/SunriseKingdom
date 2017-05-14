@@ -79,13 +79,13 @@
 			}
 
 			float3 calculateColor(float3 color, float2 uv) {
-				for (int i = 0; i < 12; i++)
+				for (int i = 0; i < 365; i++)
 				{
 					// bubble seeds
 					float size = map(Times[i], 375, 240, MinSize, MaxSize, true);
 					float rad = min(Time * Speed - (float)i / 10.0, size) * size;//siz;
 					rad = max(rad, 0.0);
-					float pox = map(sin(float(i)*546.13 + 7.5), -1, 1, 0.3, 6.2);
+					float pox = map(sin(float(i)*546.13 + 7.5), -1, 1, 0.2, 6.2);
 					float poy = map(sin(float(i)*321.22 + 4.1), -1, 1, 0.2, 0.9);
 
 					// bubble size, position and color
@@ -99,7 +99,7 @@
 					f += noise(uv - (6.5 - uv) / (size*0.4) + Time * WobbleSpeed);
 					f = sqrt(clamp(1.0 - f*f, 0.0, 1.0));
 					//if (col.x != 1.0) {
-					color -= col.xyz * (1.0 - smoothstep(rad*-0.5, rad, dis)) * f;
+						color -= col.xyz * (1.0 - smoothstep(rad*-0.5, rad, dis)) * f;
 					//}
 
 					//int numR = color.r;
@@ -111,13 +111,13 @@
 					//float percentB = frac(color.b);
 
 					//if (fmod(-numR, 2) == 1) {
-					//	color.r = 1.0 - percentR;
+					//	color.r = 0.0 + percentR;
 					//}
 					//if (fmod(-numG, 2) == 1) {
-					//	color.g = 1.0 - percentG;
+					//	color.g = 0.0 + percentG;
 					//}
 					//if (fmod(-numB, 2) == 1) {
-					//	color.b = 1.0 - percentB;
+					//	color.b = 0.0 + percentB;
 					//}
 				}
 				return color;
@@ -128,8 +128,8 @@
 				float4 col = float4(0, 0, 0, 1);
 				float2 uv = input.uv.xy;
 				uv.x *= _ScreenParams.x / _ScreenParams.y;
-				//float backgroundHue = 1.0;//0.7+0.4*uv.y;
-				float3 color = float3(1.0, 1.0, 1.0);
+				float backgroundHue = 1.0;//0.7+0.4*uv.y;
+				float3 color = float3(backgroundHue, backgroundHue, backgroundHue);
 
 				float2 uvV;
 				uvV.y = uv.y *(1.1 - (uv.y + 0.1));   // vec2(1.0)- uv.yx; -> 1.-u.yx; Thanks FabriceNeyret !

@@ -71,10 +71,10 @@ public class ColorSampler : MonoBehaviour {
 
         //for (int j = 0; j < colors.Length; j++)
         //{
-        //    if(j%2 == 0)
+        //    if (j % 2 == 0)
         //        colors[j] = new Color(Random.Range(RMin, RMax), Random.Range(GMin, GMax), Random.Range(BMin, BMax), 1);
         //    else
-        //        colors[j] = new Color(Random.Range(1-RMin, 1-RMax), Random.Range(1-GMin, 1-GMax), Random.Range(1-BMin, 1-BMax), 1);
+        //        colors[j] = new Color(Random.Range(1 - RMin, 1 - RMax), Random.Range(1 - GMin, 1 - GMax), Random.Range(1 - BMin, 1 - BMax), 1);
         //}
 
         //for (int i = 0; i < times.Length; i++)

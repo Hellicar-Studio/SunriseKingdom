@@ -389,17 +389,22 @@ public class GameController : MonoBehaviour
             }
         }
         
-        // updates email message body
-        if (!videoPlayback.screenshotEmailed)
-        {
-            // gather system data to send along as well as the color for today
-            string msg = "System Date: " + uiSettings.currentDate.text + "\n" +
-                "Sunrise Time: " + uiSettings.sunriseTimeCur.text + "\n" +
-                "Recording Start Time: " + uiSettings.recordingStartTime.text + "\n" +
-                "Recording Stop Time: " + uiSettings.recordingStopTime.text + "\n" +
-                "Color For the Day: #" + sampler.newestColorHex;
-            
-            emailSender.messageBody = msg;
-        }
+        //// updates email message body
+        //if (!videoPlayback.screenshotEmailed)
+        //{
+
+        //}
+    }
+
+    public void setEmailBody()
+    {
+        // gather system data to send along as well as the color for today
+        string msg = "System Date: " + uiSettings.currentDate.text + "\n" +
+            "Sunrise Time: " + uiSettings.sunriseTimeCur.text + "\n" +
+            "Recording Start Time: " + uiSettings.recordingStartTime.text + "\n" +
+            "Recording Stop Time: " + uiSettings.recordingStopTime.text + "\n" +
+            "Color For the Day: #" + sampler.newestColorHex + "\n";
+
+        emailSender.messageBody = msg;
     }
 }

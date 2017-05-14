@@ -12,6 +12,7 @@ public class VideoPlayback : MonoBehaviour {
     public MediaPlayer[] media;
     public Renderer[] rend;
     public ColorSampler sampler;
+    public GameController controller;
     
     [HideInInspector]
     public float videoLoadTime = 150f;
@@ -180,45 +181,101 @@ public class VideoPlayback : MonoBehaviour {
         //  capture/email sequence
         if (emailActive)
         {
-            // on first playback, will send an email of all the screenshots
-            // when the playhead of the last media in the list is 2.5 seconds before max duration
-            // playhead is in milliseconds
-            if (!screenshotEmailed && !emailSender.emailSent && playhead.value >= playhead.maxValue - 2500)
+            // on first playback we'll take a screenshot every "Capture Time Max" seconds.
+            // To do this we need to identify that we are on a first playback and how much time has elasped since that playback started.
+            // To identify first playback, we'l use the "email active" field.
+            // We'll add the delta time to the elapsed time capture time.
+            elapsedTimeCapture += Time.deltaTime;
+
+            // If our elapsed capture time equals out captureTimeMax then we shoudl take a screenshot! the problem with this is that it will take too many screenshots so we need to set
+            // Another bool so we only take one.
+            if((int)elapsedTimeCapture % captureTimeMax == 0 && !screenshotTaken)
             {
+                Debug.Log("Taking Screenshot! Number: " + captureItem);
+                StartCoroutine(CaptureScreenshot(captureItem));
+                captureItem++;
+                screenshotTaken = true;
+            }
+            // once we've taken out screenshot, we want to set our screenshot taken bool back to false;
+            if((int)elapsedTimeCapture % captureTimeMax != 0)
+            {
+                screenshotTaken = false;
+            }
+
+            // If we've made it to the end of all the recordings (assuming 5 minutes for each recording) then we should send the email and turn off the emailing and screenshotting system.
+            if ((int)elapsedTimeCapture > VideoRecord.mostRecentRecording.Length * 300)
+            {
+                Debug.Log("Sending Email!");
+                controller.setEmailBody();
                 SendEmail();
+                elapsedTimeCapture = 0;
+                captureItem = 0;
+                screenshotTaken = false;
+                emailActive = false;
             }
-            else
-            {
-                elapsedTimeCapture += Time.deltaTime;
 
-                // on first playback capture 1 screenshot for each video at a specific time
-                if (!screenshotTaken && (int)elapsedTimeCapture == captureTime)
-                {
-                    // when the last email in the list is sent, disable toggle
-                    if (itemAdjust(item) == VideoRecord.mostRecentRecording.Length - 1)
-                    {
-                        screenshotEmailed = false;
-                    }
+            //// on first playback, will send an email of all the screenshots
+            //// when the playhead of the last media in the list is 2.5 seconds before max duration
+            //// playhead is in milliseconds
+            //Debug.Log("Checking if email should be sent:");
+            //Debug.Log(" screenshotEmailed: " + screenshotEmailed);
+            //Debug.Log(" emailSender.emailSent: " + emailSender.emailSent);
+            //Debug.Log(" screenshotEmailed: " + screenshotEmailed);
+            //Debug.Log(" Media Player is Finished: " + media[player].Control.IsFinished());
+            //Debug.Log(" Playhead value is near the end: " + (playhead.value >= playhead.maxValue - 2500));
 
-                    StartCoroutine(CaptureScreenshot(captureItem));
-                    captureItem++;
-                    screenshotTaken = true;
-                }
-                else if ((int)elapsedTimeCapture == captureTime + 1)
-                {
-                    screenshotTaken = false;
-                }
+            //if (!screenshotEmailed && !emailSender.emailSent && media[player].Control.IsFinished()/*playhead.value >= playhead.maxValue - 2500*/)
+            //{
+            //    Debug.Log("Email is being sent!");
+            //    SendEmail();
+            //}
+            //else
+            //{
+            //    Debug.Log("Email is not being sent");
+            //    elapsedTimeCapture += Time.deltaTime;
 
-                // reset timer
-                if (elapsedTimeCapture >= captureTimeMax)
-                    elapsedTimeCapture = 0f;
-            }
+            //    Debug.Log("Checking isf we should take a screenshot: ");
+            //    Debug.Log(" Screenshot Take: " + screenshotTaken);
+            //    Debug.Log(" elapsedTimeCapture: " + (int)elapsedTimeCapture);
+            //    Debug.Log(" captureTime: " + captureTime);
+            //    Debug.Log(" elapsedTimeCapture == captureTime: " + ((int)elapsedTimeCapture == captureTime));
+
+            //    // on first playback capture 1 screenshot for each video at a specific time
+            //    if (!screenshotTaken && (int)elapsedTimeCapture == captureTime)
+            //    {
+            //        Debug.Log("We're taking a screenshot!");
+            //        Debug.Log("Checking if the last email in the list has been sent:");
+            //        Debug.Log("item: " + item);
+            //        Debug.Log("itemAdjust: " + itemAdjust(item));
+            //        Debug.Log("itemAdjust == mostRecentRecording.Length - 1: " + (itemAdjust(item) == VideoRecord.mostRecentRecording.Length - 1));
+
+            //        // when the last email in the list is sent, disable toggle
+            //        if (itemAdjust(item) == VideoRecord.mostRecentRecording.Length - 1)
+            //        {
+            //            Debug.Log("The last screenshot has been taken!");
+            //            screenshotEmailed = false;
+            //        }
+
+            //        Debug.Log("Start captureing the screenshot for capture item: " + captureItem);
+            //        StartCoroutine(CaptureScreenshot(captureItem));
+            //        captureItem++;
+            //        screenshotTaken = true;
+            //    }
+            //    else if ((int)elapsedTimeCapture == captureTime + 1)
+            //    {
+            //        screenshotTaken = false;
+            //    }
+
+            //    // reset timer
+            //    if (elapsedTimeCapture >= captureTimeMax)
+            //        elapsedTimeCapture = 0f;
+            //}
         }
-        else
-        {
-            elapsedTimeCapture = 0f;
-            captureItem = 0;
-        }
+        //else
+        //{
+        //    elapsedTimeCapture = 0f;
+        //    captureItem = 0;
+        //}
     }
 
     private void MediaControls()
@@ -313,6 +370,8 @@ public class VideoPlayback : MonoBehaviour {
         // converts texture to JPG and writes to folder path
         byte[] bytes = img.EncodeToJPG();
         System.IO.File.WriteAllBytes(path, bytes);
+
+        Destroy(img);
 
         if (debugActive)
             Debug.Log("Screenshot " + _item + ".jpg has been saved!");
