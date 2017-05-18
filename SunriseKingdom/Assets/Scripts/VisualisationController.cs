@@ -84,8 +84,15 @@ public class VisualisationController : MonoBehaviour {
     {
         if(drawing)
         {
-            mat.SetColorArray("Colors", sampler.colors);
-            mat.SetFloatArray("Times", sampler.times);
+            Color[] cols = new Color[365];
+            for(int i = 0; i < sampler.colors.Length; i++)
+            {
+                cols[i].a = sampler.times[i];
+                cols[i].r = sampler.colors[i].r;
+                cols[i].g = sampler.colors[i].g;
+                cols[i].b = sampler.colors[i].b;
+            }
+            mat.SetColorArray("Colors", cols);
             mat.SetFloat("Time", time);
 
             Graphics.Blit(source, destination, mat);
