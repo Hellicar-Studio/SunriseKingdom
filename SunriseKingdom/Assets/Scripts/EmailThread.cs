@@ -82,7 +82,7 @@ public class EmailThread : MonoBehaviour
         mail.Body = messageBody;
 
         // creates an attachment array
-        for (int i = 0; i < videosLength; i++)
+        for (int i = 1; i < videosLength; i++)
         {
             string attachmentPath = imagesFolder + i + ".jpg";
             try
