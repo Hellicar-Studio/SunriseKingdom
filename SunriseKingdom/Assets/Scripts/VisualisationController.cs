@@ -7,7 +7,11 @@ public class VisualisationController : MonoBehaviour {
     public Material mat;
     ColorSampler sampler;
     public bool drawing;
-    float time;
+    [Range (0, 180000)]
+    public float time;
+    [Range(0, 1)]
+    public float normalizedTime;
+    public float speed;
 
     Texture2D tex;
 
@@ -45,9 +49,15 @@ public class VisualisationController : MonoBehaviour {
 
     // Update is called once per frame
     void Update () {
-        if(drawing)
+
+    }
+
+    private void FixedUpdate()
+    {
+        if (drawing)
         {
-            time += Time.deltaTime;
+            time++;
+            normalizedTime = map(time, 0.0f, 180000.0f, 0.0f, 1.0f);
         }
     }
 
@@ -93,7 +103,8 @@ public class VisualisationController : MonoBehaviour {
                 cols[i].b = sampler.colors[i].b;
             }
             mat.SetColorArray("Colors", cols);
-            mat.SetFloat("Time", time);
+            mat.SetFloat("Time", normalizedTime);
+            mat.SetFloat("NumColors", sampler.currentDay);
 
             Graphics.Blit(source, destination, mat);
         }

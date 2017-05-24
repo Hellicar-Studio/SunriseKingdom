@@ -28,6 +28,7 @@
 			uniform float MaxSize;
 
 			uniform float4 Colors[365];
+			uniform float NumColors;
 			//uniform float Times[365];
 
 			// 2D Random
@@ -79,19 +80,20 @@
 			}
 
 			float3 calculateColor(float3 color, float2 uv) {
-				for (int i = 0; i < 365; i++)
+				for (int i = 0; i < NumColors; i++)
 				{
 					// bubble seeds
 					float size = map(Colors[i].w, 375, 240, MinSize, MaxSize, true);
-					float rad = min(Time * Speed - (float)i / 10.0, size) * size;//siz;
+					float rad = smoothstep(i / NumColors, (i + 1) / NumColors, Time);
+					rad = map(rad, 0.0, 1.0, 0.0, size);
 					rad = max(rad, 0.0);
 					float pox = map(sin(float(i)*546.13 + 7.5), -1, 1, 0.2, 6.2);
 					float poy = map(sin(float(i)*321.22 + 4.1), -1, 1, 0.2, 0.9);
 
 					// bubble size, position and color
-					float2  pos = float2(pox, poy);//-1.0 - rad + (2.0 + 2.0*rad)*fmod(pha + 0.1*Time*(0.2 + 0.8*siz), 1.0));
+					float2 pos = float2(pox, poy);//-1.0 - rad + (2.0 + 2.0*rad)*fmod(pha + 0.1*Time*(0.2 + 0.8*siz), 1.0));
 					float dis = length(uv - pos) / 2;
-					float3  col = float3(1.0, 1.0, 1.0) - Colors[i].xyz;
+					float3 col = float3(1.0, 1.0, 1.0) - Colors[i].xyz;
 
 					// render
 					float f = length(uv - pos) / rad;
