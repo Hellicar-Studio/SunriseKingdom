@@ -398,6 +398,7 @@ public class GameController : MonoBehaviour
 
     public void setEmailBody()
     {
+        uiSettings.LoadSettings();
         // gather system data to send along as well as the color for today
         string msg = "System Date: " + uiSettings.currentDate.text + "\n" +
             "Sunrise Time: " + uiSettings.sunriseTimeCur.text + "\n" +
