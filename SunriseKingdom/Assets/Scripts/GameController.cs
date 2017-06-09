@@ -241,6 +241,7 @@ public class GameController : MonoBehaviour
         SunSystem();
         RecordVideo();
         PlaybackVideo();
+        UpdateUI();
 
         // when ui is active onscreen
         if (isUIActive)
