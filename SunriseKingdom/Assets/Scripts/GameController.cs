@@ -10,7 +10,8 @@ public class GameController : MonoBehaviour
     public UIController uiSettings;
     public SunriseController sunrise;
     public VideoPlayback videoPlayback;
-    public VideoRecord videoRecord;
+	public VideoPlayback videoPlayback1;
+	public VideoRecord videoRecord;
     public EmailThread emailSender;
     public Transform playbackTransform;
     public ColorSampler sampler;
@@ -85,12 +86,16 @@ public class GameController : MonoBehaviour
         sunrise.debugActive = uiSettings._debugActive.isOn;
         videoRecord.debugActive = uiSettings._debugActive.isOn;
         videoPlayback.debugActive = uiSettings._debugActive.isOn;
-        emailSender.debugActive = uiSettings._debugActive.isOn;
+		videoPlayback1.debugActive = uiSettings._debugActive.isOn;
+		emailSender.debugActive = uiSettings._debugActive.isOn;
 
         // folder setup
         videoPlayback.videoFolder = uiSettings._videoFolder.text;
         videoPlayback.imageFolder = uiSettings._imageFolder.text;
-        emailSender.imagesFolder = uiSettings._imageFolder.text;
+		videoPlayback1.videoFolder = uiSettings._videoFolder.text;
+		Debug.Log(uiSettings._imageFolder.text);
+		videoPlayback1.imageFolder = uiSettings._imageFolder.text;
+		emailSender.imagesFolder = uiSettings._imageFolder.text;
 
         // setup video playback variables
         float videoLoadTime;
@@ -100,13 +105,18 @@ public class GameController : MonoBehaviour
         else
             videoPlayback.videoLoadTime = 150; // default value
 
-        // capture settings
-        float captureTime;
+		videoPlayback1.videoLoadTime = videoLoadTime;
+
+
+		// capture settings
+		float captureTime;
         float.TryParse(uiSettings._captureTime.text, out captureTime);
         if (parsed)
             videoPlayback.captureTime = captureTime;
         else
             videoPlayback.captureTime = 30f; // default value
+
+		videoPlayback1.captureTime = captureTime;
 
         float captureTimeMax;
         float.TryParse(uiSettings._captureTimeMax.text, out captureTimeMax);
@@ -115,8 +125,11 @@ public class GameController : MonoBehaviour
         else
             videoPlayback.captureTimeMax = 60f; // default value
 
-        // setup video recorder variables
-        videoRecord.CamIP = uiSettings._cameraIP.text;
+		videoPlayback1.captureTime = captureTimeMax;
+
+
+		// setup video recorder variables
+		videoRecord.CamIP = uiSettings._cameraIP.text;
         videoRecord.recordingsRoot = uiSettings._videoFolder.text;
         float duration;
         parsed = float.TryParse(uiSettings._recordingDuration.text, out duration);
@@ -150,6 +163,7 @@ public class GameController : MonoBehaviour
         uiSettings.latlon.text = "Lat/Lon: " + sunrise.lat + " / " + sunrise.lon;
         uiSettings.minuteOffset.text = "Minute Offset: " + sunrise.minuteOffset;
         uiSettings.sunriseTimeCur.text = "Sunrise Time Current: " + sunrise.sunriseTime;
+		Debug.Log("Sunrise Time Current: " + sunrise.sunriseTime);
         uiSettings.sunriseTimeCheck.text = "Sunrise Time Check: " + uiSettings._sunriseTimeCheck.text;
 
         // recording settings
@@ -200,7 +214,11 @@ public class GameController : MonoBehaviour
         if (pause) videoPlayback.pause = true;
         if (stop) videoPlayback.stop = true;
 
-        uiSettings._mediaPlay.isOn = videoPlayback.play;
+		if (play) videoPlayback1.play = true;
+		if (pause) videoPlayback1.pause = true;
+		if (stop) videoPlayback1.stop = true;
+
+		uiSettings._mediaPlay.isOn = videoPlayback.play;
         uiSettings._mediaPause.isOn = videoPlayback.pause;
         uiSettings._mediaStop.isOn = videoPlayback.stop;
 
@@ -290,16 +308,20 @@ public class GameController : MonoBehaviour
         //Debug.Log("Time To check: " + uiSettings._sunriseTimeCheck.text);
         if (sunrise.GetLocalTime() == uiSettings._sunriseTimeCheck.text)
         {
-            sunrise.GetSunriseTime();
+			Debug.Log("Getting Sunrise Time");
+			Debug.Log("Time Was: " + sunrise.sunriseTime);
+			sunrise.GetSunriseTime();
             sampler.saveSunriseTime(sunrise.sunriseTime);
-        }
+			Debug.Log("Time Is: " + sunrise.sunriseTime);
+		}
         else
         {
             // reset switch
             if (sunrise.isUpdateTime)
             {
-                // updates all of the UI text fields
-                // runs after sunrise data has been pulled
+				// updates all of the UI text fields
+				// runs after sunrise data has been pulled
+				Debug.Log("Update UI Text");
                 UpdateUIText();
 
                 sunrise.isUpdateTime = false;
@@ -377,7 +399,9 @@ public class GameController : MonoBehaviour
         {
             if (videoPlayback.beginPlayback)
                 videoPlayback.beginPlayback = false;
-        }
+			if (videoPlayback1.beginPlayback)
+				videoPlayback1.beginPlayback = false;
+		}
         else
         {
             if (!videoPlayback.beginPlayback)
@@ -388,7 +412,16 @@ public class GameController : MonoBehaviour
             {
                 videoPlayback.UpdatePlayer();
             }
-        }
+
+			if (!videoPlayback1.beginPlayback)
+			{
+				videoPlayback1.BeginPlayback();
+			}
+			else
+			{
+				videoPlayback1.UpdatePlayer();
+			}
+		}
         
         //// updates email message body
         //if (!videoPlayback.screenshotEmailed)

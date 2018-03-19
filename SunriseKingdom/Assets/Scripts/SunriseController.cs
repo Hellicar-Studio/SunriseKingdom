@@ -85,6 +85,7 @@ public class SunriseController : MonoBehaviour {
 
     IEnumerator GetUpdatedTime() 
     {
+		Debug.Log("Getting Updated Time");
         // example of full URL "http://api.openweathermap.org/data/2.5/weather?q=Berlin&appid=7f09e7d718a5c1dd8d39f1635ac7f006"
         using(UnityWebRequest www = UnityWebRequest.Get(URL1 + city + URL2 + apiKey))
         {
@@ -100,6 +101,7 @@ public class SunriseController : MonoBehaviour {
             }
             else
             {
+				Debug.Log("Got Response");
                 // results as text
                 data = www.downloadHandler.text;
                 // parses text based on http://openweathermap.org/api for JSON
