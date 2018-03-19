@@ -9,12 +9,11 @@ public class GameController : MonoBehaviour
     public GameObject uiCanvas;
     public UIController uiSettings;
     public SunriseController sunrise;
-    public VideoPlayback videoPlayback;
-	public VideoPlayback videoPlayback1;
+    public VideoPlayback[] videoPlayback;
 	public VideoRecord videoRecord;
     public EmailThread emailSender;
-    public Transform playbackTransform;
-    public ColorSampler sampler;
+    public Transform[] playbackTransform;
+	public ColorSampler sampler;
     public VisualisationController visController;
     [Header("Support")]
     public bool manualRecord = false;
@@ -35,10 +34,13 @@ public class GameController : MonoBehaviour
 
         // toggles
         emailSender.useThreading = useThreading;
-        videoPlayback.emailActive = emailActive;
+		for(int i = 0; i < videoPlayback.Length; i++)
+		{
+			videoPlayback[i].emailActive = emailActive;
+		}
 
-        // enables ui canvas on launch
-        uiCanvas.SetActive(isUIActive);
+		// enables ui canvas on launch
+		uiCanvas.SetActive(isUIActive);
 
         // if this is the first time the app is run
         if (PlayerPrefs.GetInt("isFirstRun") == 0 || runFirstRun)
@@ -85,48 +87,73 @@ public class GameController : MonoBehaviour
         // setup debug info
         sunrise.debugActive = uiSettings._debugActive.isOn;
         videoRecord.debugActive = uiSettings._debugActive.isOn;
-        videoPlayback.debugActive = uiSettings._debugActive.isOn;
-		videoPlayback1.debugActive = uiSettings._debugActive.isOn;
+		for (int i = 0; i < videoPlayback.Length; i++)
+		{
+			videoPlayback[i].debugActive = uiSettings._debugActive.isOn;
+		}
 		emailSender.debugActive = uiSettings._debugActive.isOn;
 
-        // folder setup
-        videoPlayback.videoFolder = uiSettings._videoFolder.text;
-        videoPlayback.imageFolder = uiSettings._imageFolder.text;
-		videoPlayback1.videoFolder = uiSettings._videoFolder.text;
-		Debug.Log(uiSettings._imageFolder.text);
-		videoPlayback1.imageFolder = uiSettings._imageFolder.text;
+		// folder setup
+
+		for (int i = 0; i < videoPlayback.Length; i++)
+		{
+			videoPlayback[i].videoFolder = uiSettings._videoFolder.text;
+			videoPlayback[i].imageFolder = uiSettings._imageFolder.text;
+		}
 		emailSender.imagesFolder = uiSettings._imageFolder.text;
 
         // setup video playback variables
         float videoLoadTime;
         float.TryParse(uiSettings._videoLoadTime.text, out videoLoadTime);
         if (parsed)
-            videoPlayback.videoLoadTime = videoLoadTime;
+		{
+			for (int i = 0; i < videoPlayback.Length; i++)
+			{
+				videoPlayback[i].videoLoadTime = videoLoadTime;
+			}
+		}
         else
-            videoPlayback.videoLoadTime = 150; // default value
-
-		videoPlayback1.videoLoadTime = videoLoadTime;
-
+		{
+			for (int i = 0; i < videoPlayback.Length; i++)
+			{
+				videoPlayback[i].videoLoadTime = 150;
+			}
+		}
 
 		// capture settings
 		float captureTime;
         float.TryParse(uiSettings._captureTime.text, out captureTime);
         if (parsed)
-            videoPlayback.captureTime = captureTime;
+		{
+			for (int i = 0; i < videoPlayback.Length; i++)
+			{
+				videoPlayback[i].captureTime = captureTime; // default value
+			}
+		}
         else
-            videoPlayback.captureTime = 30f; // default value
-
-		videoPlayback1.captureTime = captureTime;
+		{
+			for (int i = 0; i < videoPlayback.Length; i++)
+			{
+				videoPlayback[i].captureTime = 30f; // default value
+			}
+		}
 
         float captureTimeMax;
         float.TryParse(uiSettings._captureTimeMax.text, out captureTimeMax);
         if (parsed)
-            videoPlayback.captureTimeMax = captureTimeMax;
+		{
+			for (int i = 0; i < videoPlayback.Length; i++)
+			{
+				videoPlayback[i].captureTimeMax = captureTimeMax; // default value
+			}
+		}
         else
-            videoPlayback.captureTimeMax = 60f; // default value
-
-		videoPlayback1.captureTime = captureTimeMax;
-
+		{
+			for (int i = 0; i < videoPlayback.Length; i++)
+			{
+				videoPlayback[i].captureTimeMax = 60f; // default value
+			}
+		}
 
 		// setup video recorder variables
 		videoRecord.CamIP = uiSettings._cameraIP.text;
@@ -171,11 +198,11 @@ public class GameController : MonoBehaviour
         uiSettings.recordingDuration.text = "Recording Duration: " + uiSettings._recordingDuration.text;
 
         // playback settings
-        uiSettings.imageFolder.text = "Image Folder: " + videoPlayback.imageFolder;
-        uiSettings.videoFolder.text = "Video Folder: " + videoPlayback.videoFolder;
-        uiSettings.videoLoadTime.text = "Video Load Time: " + videoPlayback.videoLoadTime.ToString();
-        uiSettings.captureTime.text = "Capture Time: " + videoPlayback.captureTime.ToString();
-        uiSettings.captureTimeMax.text = "Capture Time Max: " + videoPlayback.captureTimeMax.ToString();
+        uiSettings.imageFolder.text = "Image Folder: " + videoPlayback[0].imageFolder;
+        uiSettings.videoFolder.text = "Video Folder: " + videoPlayback[0].videoFolder;
+        uiSettings.videoLoadTime.text = "Video Load Time: " + videoPlayback[0].videoLoadTime.ToString();
+        uiSettings.captureTime.text = "Capture Time: " + videoPlayback[0].captureTime.ToString();
+        uiSettings.captureTimeMax.text = "Capture Time Max: " + videoPlayback[0].captureTimeMax.ToString();
 
         // email sender
         uiSettings.emailAccount.text = "Account: " + emailSender.emailAccount;
@@ -199,28 +226,34 @@ public class GameController : MonoBehaviour
         // video playback window position
         float x = uiSettings._xPosition.value;
         float y = uiSettings._yPosition.value;
-        playbackTransform.position = new Vector3(x, y, 0f);
+		//for(int i = 0; i < playbackTransform.Length; i++)
+		//{
+		//	playbackTransform[i].position = new Vector3(x, y, 0f);
+		//}
 
-        // video playback window scale
-        float scale = uiSettings._scale.value;
-        playbackTransform.localScale = new Vector3(scale, scale, 1f);
+
+		// video playback window scale
+		float scale = uiSettings._scale.value;
+		//for (int i = 0; i < playbackTransform.Length; i++)
+		//{
+		//	playbackTransform[i].localScale = new Vector3(x, y, 0f);
+		//}
 
         // capture active media player button states
         bool play = uiSettings._mediaPlay.GetComponent<UIMouseDown>().selected;
         bool pause = uiSettings._mediaPause.GetComponent<UIMouseDown>().selected;
         bool stop = uiSettings._mediaStop.GetComponent<UIMouseDown>().selected;
 
-        if (play) videoPlayback.play = true;
-        if (pause) videoPlayback.pause = true;
-        if (stop) videoPlayback.stop = true;
+		for(int i = 0; i < videoPlayback.Length; i++)
+		{
+			if (play) videoPlayback[i].play = true;
+			if (pause) videoPlayback[i].pause = true;
+			if (stop) videoPlayback[i].stop = true;
+		}
 
-		if (play) videoPlayback1.play = true;
-		if (pause) videoPlayback1.pause = true;
-		if (stop) videoPlayback1.stop = true;
-
-		uiSettings._mediaPlay.isOn = videoPlayback.play;
-        uiSettings._mediaPause.isOn = videoPlayback.pause;
-        uiSettings._mediaStop.isOn = videoPlayback.stop;
+		uiSettings._mediaPlay.isOn = videoPlayback[0].play;
+        uiSettings._mediaPause.isOn = videoPlayback[0].pause;
+        uiSettings._mediaStop.isOn = videoPlayback[0].stop;
 
         // handles the manual record button
         bool mRecord = uiSettings._manualRecord.GetComponent<UIMouseDown>().selected;
@@ -385,7 +418,7 @@ public class GameController : MonoBehaviour
             if (videoRecord.isRecording)
             {
                 uiSettings.recordingStopTime.text = "Recording Stop: " + sunrise.GetLocalTime();
-                videoPlayback.emailActive = true;
+                videoPlayback[0].emailActive = true;
                 videoRecord.StopRecording();
                 visController.stopDrawing();
             }
@@ -395,40 +428,32 @@ public class GameController : MonoBehaviour
     // video playback system
     private void PlaybackVideo()
     {
-        if (isSunriseActive)
-        {
-            if (videoPlayback.beginPlayback)
-                videoPlayback.beginPlayback = false;
-			if (videoPlayback1.beginPlayback)
-				videoPlayback1.beginPlayback = false;
-		}
-        else
-        {
-            if (!videoPlayback.beginPlayback)
-            {
-                videoPlayback.BeginPlayback();
-            }
-            else
-            {
-                videoPlayback.UpdatePlayer();
-            }
-
-			if (!videoPlayback1.beginPlayback)
+		for (int i = 0; i < videoPlayback.Length; i++)
+		{
+			if (isSunriseActive)
 			{
-				videoPlayback1.BeginPlayback();
+				if (videoPlayback[i].beginPlayback)
+					videoPlayback[i].beginPlayback = false;
 			}
 			else
 			{
-				videoPlayback1.UpdatePlayer();
+				if (!videoPlayback[i].beginPlayback)
+				{
+					videoPlayback[i].BeginPlayback();
+				}
+				else
+				{
+					videoPlayback[i].UpdatePlayer();
+				}
 			}
-		}
-        
-        //// updates email message body
-        //if (!videoPlayback.screenshotEmailed)
-        //{
 
-        //}
-    }
+			//// updates email message body
+			//if (!videoPlayback.screenshotEmailed)
+			//{
+
+			//}
+		}
+	}
 
     public void setEmailBody()
     {
